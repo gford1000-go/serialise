@@ -23,6 +23,19 @@ func (g *gobApproach) Name() string {
 	return "GOB"
 }
 
+// IsSerialisable returns true if an instance of the specified type
+// can be serialised
+func (g *gobApproach) IsSerialisable(v any) (ok bool) {
+	defer func() {
+		if r := recover(); r != nil {
+			ok = false
+		}
+	}()
+
+	_, err := g.Pack(v)
+	return err == nil
+}
+
 // Pack serialises the instance to a byte slice
 func (g *gobApproach) Pack(data any) ([]byte, error) {
 	gd, err := g.toGobDataBytes(data)

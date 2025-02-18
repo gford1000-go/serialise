@@ -3,7 +3,7 @@ package serialise
 import (
 	"bytes"
 	"encoding/binary"
-	"fmt"
+	"errors"
 	"time"
 )
 
@@ -21,6 +21,22 @@ type minData struct {
 func (m *minData) Name() string {
 	return "MinData"
 }
+
+// IsSerialisable returns true if an instance of the specified type
+// can be serialised
+func (m *minData) IsSerialisable(v any) (ok bool) {
+	defer func() {
+		if r := recover(); r != nil {
+			ok = false
+		}
+	}()
+
+	_, err := m.Pack(v)
+	return err == nil
+}
+
+// ErrMinDataTypeNotSerialisable is raised if a variable type is not serialisable by the MinData approach
+var ErrMinDataTypeNotSerialisable = errors.New("type of argument is not serialisable")
 
 // Pack serialises the instance to a byte slice
 func (m *minData) Pack(data any) ([]byte, error) {
@@ -165,12 +181,25 @@ func (m *minData) Pack(data any) ([]byte, error) {
 	case [][]byte:
 		return packByteSliceSlice(byteSliceSliceType, v)
 	default:
-		panic(fmt.Sprintf("Bums! (%T)", v))
+		return nil, ErrMinDataTypeNotSerialisable
 	}
 }
 
+// ErrMinDataTypeNotDeserialisable is raised if a variable type is not deserialisable by the MinData approach
+var ErrMinDataTypeNotDeserialisable = errors.New("type specified within the data is not deserialisable")
+
+// ErrUnexpectedDeserialisationError is raised if a panic is generated during deserialisation
+var ErrUnexpectedDeserialisationError = errors.New("unexpected deserialisation failure - possible corrupted data provided")
+
 // Unpack deserialises an instance from the byte slice
-func (m *minData) Unpack(data []byte, opts ...func(opt *TypeRegistryOptions)) (any, error) {
+func (m *minData) Unpack(data []byte, opts ...func(opt *TypeRegistryOptions)) (output any, e error) {
+
+	defer func() {
+		if r := recover(); r != nil {
+			output = nil
+			e = ErrUnexpectedDeserialisationError
+		}
+	}()
 
 	var t int8
 	err := binary.Read(bytes.NewBuffer(data[0:1]), binary.LittleEndian, &t)
@@ -301,7 +330,7 @@ func (m *minData) Unpack(data []byte, opts ...func(opt *TypeRegistryOptions)) (a
 		}
 		return ss, nil
 	default:
-		panic(fmt.Sprintf("Bums Again! (%d)", t))
+		return nil, ErrMinDataTypeNotDeserialisable
 	}
 }
 

@@ -60,6 +60,8 @@ type Approach interface {
 	Pack(data any) ([]byte, error)
 	// Unpack deserialises an instance from the byte slice
 	Unpack(data []byte, opts ...func(opt *TypeRegistryOptions)) (any, error)
+	// IsSerialisable returns true if the type of the instance is serialisable
+	IsSerialisable(v any) bool
 }
 
 // SerialisationOptions adjust how serialisation is performed
