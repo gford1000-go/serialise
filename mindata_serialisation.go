@@ -123,7 +123,7 @@ func (m *minData) Pack(data any) ([]byte, error) {
 	case string:
 		return pack(stringType, []byte(v))
 	case *string:
-		return pack(stringType, []byte(*v))
+		return pack(pstringType, []byte(*v))
 	case []byte:
 		return pack(byteSliceType, v)
 	default:
