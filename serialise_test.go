@@ -700,3 +700,74 @@ func TestToBytes(t *testing.T) {
 		compareValue(v, test.V, test.TypeName)
 	}
 }
+
+func TestToBytes_1(t *testing.T) {
+
+	type testData struct {
+		V        any
+		TypeName string
+	}
+
+	var i8 int8 = 42
+	var ss []string = []string{"This", "is", "not", "encrypted"}
+	var ss2 []string = []string{"01234567890123456789012345678901234567890123456789"}
+
+	compareValue := func(a, b any, name string) {
+		if b == nil {
+			if a != nil {
+				t.Fatalf("Mismatch in <nil>")
+			}
+			return
+		}
+
+		switch b.(type) {
+		case int8:
+			testCompareValue[int8](a, b, name, t)
+		case []string:
+			testCompareSliceValue[string](a, b, name, t)
+		default:
+			t.Fatalf("No test available for type: %s (%s)", fmt.Sprintf("%T", b), name)
+		}
+
+	}
+
+	tests := []testData{
+		{
+			ss,
+			"[]string",
+		},
+		{
+			ss2,
+			"[]string",
+		},
+		{
+			i8,
+			"int8",
+		},
+	}
+
+	approach := NewMinDataApproach()
+
+	testRegistry := NewTypeRegistry()
+	testRegistry.AddTypeOf(ss)
+
+	f := func(o *TypeRegistryOptions) {
+		o.Registry = testRegistry
+	}
+
+	key := []byte("01234567890123456789012345678912")
+
+	for _, test := range tests {
+
+		b, _, err := ToBytes(test.V, WithSerialisationApproach(approach), WithAESGCMEncryption(key))
+		if err != nil {
+			t.Fatalf("Unexpected error: %v", err)
+		}
+
+		v, err := FromBytes(b, approach, WithTypeRegistryOptions(f), WithAESGCMEncryption(key))
+		if err != nil {
+			t.Fatalf("Unexpected error: %v", err)
+		}
+		compareValue(v, test.V, test.TypeName)
+	}
+}

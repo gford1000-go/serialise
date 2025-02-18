@@ -129,6 +129,15 @@ func ToBytes(data any, opts ...func(*SerialisationOptions)) ([]byte, string, err
 	if err != nil {
 		return nil, "", err
 	}
+
+	// Apply optional encryption
+	if o.Encryptor != nil {
+		b, err = o.Encryptor(b)
+		if err != nil {
+			return nil, "", err
+		}
+	}
+
 	return b, o.Approach.Name(), nil
 }
 
@@ -158,5 +167,15 @@ func FromBytes(data []byte, approach Approach, opts ...func(*SerialisationOption
 		opt(&o)
 	}
 
-	return approach.Unpack(data, func(opt *TypeRegistryOptions) { opt.replace(o.RegistryOptions) })
+	// Apply optional encryption
+	var b []byte = data
+	var err error
+	if o.Decryptor != nil {
+		b, err = o.Decryptor(b)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return approach.Unpack(b, func(opt *TypeRegistryOptions) { opt.replace(o.RegistryOptions) })
 }
