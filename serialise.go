@@ -70,6 +70,10 @@ type SerialisationOptions struct {
 	Approach Approach
 	// RegistryOptions allows type registry overrides to be applied
 	RegistryOptions *TypeRegistryOptions
+	// Encryptor will encrypt the provided data
+	Encryptor func(data []byte) ([]byte, error)
+	// Decryptor will decrypt the provided data
+	Decryptor func(data []byte) ([]byte, error)
 }
 
 // WithSerialisationApproach sets the serialisation approach to be used when calling ToBytes()
