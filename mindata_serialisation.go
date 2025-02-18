@@ -19,7 +19,7 @@ type minData struct {
 
 // Name of the approach
 func (m *minData) Name() string {
-	return "MinData"
+	return "MD1"
 }
 
 // IsSerialisable returns true if an instance of the specified type
