@@ -55,25 +55,25 @@ func (m *minData) Pack(data any) ([]byte, error) {
 	case *int8:
 		return pack(pint8Type, data)
 	case []int8:
-		return packSimpleSlice(int8SliceType, v)
+		return packSimpleSliceMD(int8SliceType, v)
 	case int16:
 		return pack(int16Type, data)
 	case *int16:
 		return pack(pint16Type, data)
 	case []int16:
-		return packSimpleSlice(int16SliceType, v)
+		return packSimpleSliceMD(int16SliceType, v)
 	case int32:
 		return pack(int32Type, data)
 	case *int32:
 		return pack(pint32Type, data)
 	case []int32:
-		return packSimpleSlice(int32SliceType, v)
+		return packSimpleSliceMD(int32SliceType, v)
 	case int64:
 		return pack(int64Type, data)
 	case *int64:
 		return pack(pint64Type, data)
 	case []int64:
-		return packSimpleSlice(int64SliceType, v)
+		return packSimpleSliceMD(int64SliceType, v)
 	case uint8:
 		return pack(uint8Type, data)
 	case *uint8:
@@ -83,43 +83,43 @@ func (m *minData) Pack(data any) ([]byte, error) {
 	case *uint16:
 		return pack(puint16Type, data)
 	case []uint16:
-		return packSimpleSlice(uint16SliceType, v)
+		return packSimpleSliceMD(uint16SliceType, v)
 	case uint32:
 		return pack(uint32Type, data)
 	case *uint32:
 		return pack(puint32Type, data)
 	case []uint32:
-		return packSimpleSlice(uint32SliceType, v)
+		return packSimpleSliceMD(uint32SliceType, v)
 	case uint64:
 		return pack(uint64Type, data)
 	case *uint64:
 		return pack(puint64Type, data)
 	case []uint64:
-		return packSimpleSlice(uint64SliceType, v)
+		return packSimpleSliceMD(uint64SliceType, v)
 	case float32:
 		return pack(float32Type, data)
 	case *float32:
 		return pack(pfloat32Type, data)
 	case []float32:
-		return packSimpleSlice(float32SliceType, v)
+		return packSimpleSliceMD(float32SliceType, v)
 	case float64:
 		return pack(float64Type, data)
 	case *float64:
 		return pack(pfloat64Type, data)
 	case []float64:
-		return packSimpleSlice(float64SliceType, v)
+		return packSimpleSliceMD(float64SliceType, v)
 	case bool:
 		return pack(boolType, data)
 	case *bool:
 		return pack(pboolType, data)
 	case []bool:
-		return packSimpleSlice(boolSliceType, v)
+		return packSimpleSliceMD(boolSliceType, v)
 	case time.Duration:
 		return pack(durationType, data)
 	case *time.Duration:
 		return pack(pdurationType, data)
 	case []time.Duration:
-		return packSimpleSlice(durationSliceType, v)
+		return packSimpleSliceMD(durationSliceType, v)
 	case string:
 		return pack(stringType, []byte(v))
 	case *string:
@@ -156,7 +156,7 @@ func (m *minData) Unpack(data []byte, opts ...func(opt *TypeRegistryOptions)) (a
 	case pint8Type:
 		return unpackPtr(new(int8), data)
 	case int8SliceType:
-		return unpackSimpleSlice[int8](data[1:], 1)
+		return unpackSimpleSliceMD[int8](data[1:], 1)
 	case int16Type:
 		return unpackMD[int16](data)
 	case pint16Type:
@@ -214,7 +214,7 @@ func (m *minData) Unpack(data []byte, opts ...func(opt *TypeRegistryOptions)) (a
 	}
 }
 
-func packSimpleSlice[T any](t int8, data []T) ([]byte, error) {
+func packSimpleSliceMD[T any](t int8, data []T) ([]byte, error) {
 	var buf bytes.Buffer
 
 	err := binary.Write(&buf, binary.LittleEndian, t)
@@ -237,7 +237,7 @@ func packSimpleSlice[T any](t int8, data []T) ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-func unpackSimpleSlice[T any](data []byte, eleSize int64) (any, error) {
+func unpackSimpleSliceMD[T any](data []byte, eleSize int64) (any, error) {
 	var size int64
 	err := binary.Read(bytes.NewBuffer(data), binary.LittleEndian, &size)
 	if err != nil {

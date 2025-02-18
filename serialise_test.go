@@ -284,7 +284,6 @@ func TestToMinBytes(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Unexpected error for %s: %v", test.T, err)
 		}
-		fmt.Printf("%s Len: %d\n", test.T, len(b))
 
 		v, err := approach.Unpack(b)
 		if err != nil {
@@ -358,12 +357,12 @@ func TestToMinBytes(t *testing.T) {
 
 func runSliceTest[T comparable](st int8, data []T, eleSize int64, t *testing.T) {
 
-	b, err := packSimpleSlice(st, data)
+	b, err := packSimpleSliceMD(st, data)
 	if err != nil {
 		t.Fatalf("Unexpected error when packing slice: %v", err)
 	}
 
-	v, err := unpackSimpleSlice[T](b[1:], eleSize)
+	v, err := unpackSimpleSliceMD[T](b[1:], eleSize)
 	if err != nil {
 		t.Fatalf("Unexpected error when unpacking slice: %v", err)
 	}
@@ -620,7 +619,6 @@ func TestToBytes(t *testing.T) {
 	for _, test := range tests {
 
 		b, _, err := ToBytes(test.V, WithSerialisationApproach(approach))
-		fmt.Printf("%s Len: %d\n", test.TypeName, len(b))
 		if err != nil {
 			t.Fatalf("Unexpected error: %v", err)
 		}
@@ -629,7 +627,6 @@ func TestToBytes(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Unexpected error: %v", err)
 		}
-		fmt.Printf("%T\n", v)
 		compareValue(v, test.V, test.TypeName)
 	}
 }
