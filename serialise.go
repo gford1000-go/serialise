@@ -43,9 +43,11 @@ const (
 	durationSliceType
 	stringType
 	pstringType
+	stringSliceType
 	timeType
 	ptimeType
 	byteSliceType
+	byteSliceSliceType
 	nilType
 	gobType
 )

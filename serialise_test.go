@@ -670,10 +670,10 @@ func TestToBytes(t *testing.T) {
 			tds,
 			"[]time.Duration",
 		},
-		// {
-		// 	ss,
-		// 	"[]string",
-		// },
+		{
+			ss,
+			"[]string",
+		},
 	}
 
 	approach := NewMinDataApproach()

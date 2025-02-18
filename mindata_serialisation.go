@@ -45,6 +45,36 @@ func (m *minData) Pack(data any) ([]byte, error) {
 		return append(tbuf.Bytes(), vbuf.Bytes()...), nil
 	}
 
+	packByteSliceSlice := func(t int8, data [][]byte) ([]byte, error) {
+		var buf bytes.Buffer
+
+		err := binary.Write(&buf, binary.LittleEndian, t)
+		if err != nil {
+			return nil, err
+		}
+		if data != nil {
+			var size int64 = int64(len(data))
+			err = binary.Write(&buf, binary.LittleEndian, size)
+			if err != nil {
+				return nil, err
+			}
+			for _, b := range data {
+				size = int64(len(b))
+				err = binary.Write(&buf, binary.LittleEndian, size)
+				if err != nil {
+					return nil, err
+				}
+				if size > 0 {
+					err = binary.Write(&buf, binary.LittleEndian, b)
+					if err != nil {
+						return nil, err
+					}
+				}
+			}
+		}
+		return buf.Bytes(), nil
+	}
+
 	if data == nil {
 		return pack(nilType, nil)
 	}
@@ -124,8 +154,16 @@ func (m *minData) Pack(data any) ([]byte, error) {
 		return pack(stringType, []byte(v))
 	case *string:
 		return pack(pstringType, []byte(*v))
+	case []string:
+		var bss [][]byte = make([][]byte, len(v))
+		for i := 0; i < len(v); i++ {
+			bss[i] = []byte(v[i])
+		}
+		return packByteSliceSlice(stringSliceType, bss)
 	case []byte:
 		return pack(byteSliceType, v)
+	case [][]byte:
+		return packByteSliceSlice(byteSliceSliceType, v)
 	default:
 		panic(fmt.Sprintf("Bums! (%T)", v))
 	}
@@ -146,6 +184,28 @@ func (m *minData) Unpack(data []byte, opts ...func(opt *TypeRegistryOptions)) (a
 			return nil, err
 		}
 		return v, nil
+	}
+
+	unpackByteSliceSlice := func(data []byte) ([][]byte, error) {
+		var size int64
+		err := binary.Read(bytes.NewBuffer(data), binary.LittleEndian, &size)
+		if err != nil {
+			return nil, err
+		}
+
+		bss := make([][]byte, size)
+		var i int64
+		var offset int64 = 8
+		for i = 0; i < size; i++ {
+			var itemSize int64
+			err := binary.Read(bytes.NewBuffer(data[offset:]), binary.LittleEndian, &itemSize)
+			if err != nil {
+				return nil, err
+			}
+			bss[i] = data[offset+8 : offset+8+itemSize]
+			offset += 8 + itemSize
+		}
+		return bss, nil
 	}
 
 	switch t {
@@ -228,7 +288,18 @@ func (m *minData) Unpack(data []byte, opts ...func(opt *TypeRegistryOptions)) (a
 		return &s, nil
 	case byteSliceType:
 		return data[1:], nil
-
+	case byteSliceSliceType:
+		return unpackByteSliceSlice(data[1:])
+	case stringSliceType:
+		bss, err := unpackByteSliceSlice(data[1:])
+		if err != nil {
+			return nil, err
+		}
+		ss := make([]string, len(bss))
+		for i := 0; i < len(bss); i++ {
+			ss[i] = string(bss[i])
+		}
+		return ss, nil
 	default:
 		panic(fmt.Sprintf("Bums Again! (%d)", t))
 	}
