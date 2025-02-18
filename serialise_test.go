@@ -277,14 +277,16 @@ func TestToMinBytes(t *testing.T) {
 		},
 	}
 
+	approach := NewMinDataApproach()
+
 	for _, test := range tests {
-		b, err := toMinDataBytes(test.V)
+		b, err := approach.Pack(test.V)
 		if err != nil {
 			t.Fatalf("Unexpected error for %s: %v", test.T, err)
 		}
 		fmt.Printf("%s Len: %d\n", test.T, len(b))
 
-		v, err := fromMinDataBytes(b)
+		v, err := approach.Unpack(b)
 		if err != nil {
 			t.Fatalf("Unexpected error for %s: %v", test.T, err)
 		}
@@ -341,11 +343,11 @@ func TestToMinBytes(t *testing.T) {
 		}
 	}
 
-	b, err := toMinDataBytes(nil)
+	b, err := approach.Pack(nil)
 	if err != nil {
 		t.Fatalf("Unexpected error when packing nil: %v", err)
 	}
-	vNil, err := fromMinDataBytes(b)
+	vNil, err := approach.Unpack(b)
 	if err != nil {
 		t.Fatalf("Unexpected error when unpacking nil: %v", err)
 	}
@@ -605,6 +607,8 @@ func TestToBytes(t *testing.T) {
 		},
 	}
 
+	approach := NewMinDataApproach()
+
 	testRegistry := NewTypeRegistry()
 	testRegistry.AddTypeOf(ss)
 	testRegistry.AddTypeOf(is8)
@@ -615,13 +619,13 @@ func TestToBytes(t *testing.T) {
 
 	for _, test := range tests {
 
-		b, a, err := ToBytes(test.V, WithSerialisationApproach(MinData))
+		b, _, err := ToBytes(test.V, WithSerialisationApproach(approach))
 		fmt.Printf("%s Len: %d\n", test.TypeName, len(b))
 		if err != nil {
 			t.Fatalf("Unexpected error: %v", err)
 		}
 
-		v, err := FromBytes(b, a, WithTypeRegistryOptions(f))
+		v, err := FromBytes(b, approach, WithTypeRegistryOptions(f))
 		if err != nil {
 			t.Fatalf("Unexpected error: %v", err)
 		}

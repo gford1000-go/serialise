@@ -9,6 +9,57 @@ import (
 	"time"
 )
 
+// NewGOBApproach creates an Approach instance
+// that uses gob serialisation.
+func NewGOBApproach() Approach {
+	return &gobApproach{}
+}
+
+type gobApproach struct {
+}
+
+// Name of the approach
+func (g *gobApproach) Name() string {
+	return "GOB"
+}
+
+// Pack serialises the instance to a byte slice
+func (g *gobApproach) Pack(data any) ([]byte, error) {
+	gd, err := g.toGobDataBytes(data)
+	if err != nil {
+		return nil, err
+	}
+
+	var buf bytes.Buffer
+	encoder := gob.NewEncoder(&buf)
+	if err := encoder.Encode(gd); err != nil {
+		return nil, err
+	} else {
+		return buf.Bytes(), nil
+	}
+}
+
+// Unpack deserialises an instance from the byte slice
+func (g *gobApproach) Unpack(data []byte, opts ...func(opt *TypeRegistryOptions)) (any, error) {
+	var buf = bytes.NewBuffer(data)
+
+	decoder := gob.NewDecoder(buf)
+
+	var gd gobData
+
+	err := decoder.Decode(&gd)
+	if err != nil {
+		return nil, err
+	}
+
+	v, err := g.fromGobDataBytes(&gd, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return v, err
+
+}
+
 type gobData struct {
 	DataType int8
 	TypeName string
@@ -16,7 +67,7 @@ type gobData struct {
 }
 
 // toGobDataBytes serialises data types to []byte using gob encoding
-func toGobDataBytes(data any) (*gobData, error) {
+func (g *gobApproach) toGobDataBytes(data any) (*gobData, error) {
 	if data == nil {
 		return &gobData{DataType: nilType, Data: []byte{}}, nil
 	}
@@ -117,11 +168,13 @@ func toGobDataBytes(data any) (*gobData, error) {
 	}
 }
 
+// ErrNoGobData raised when GOB serialisation approach has no data to deserialise
 var ErrNoGobData = errors.New("no data provided to deserialise")
 
-var ErrNoDeserialisableData = errors.New("no data found provided to deserialise")
+// ErrNoDeserialisableData raised when GOB serialisation approach has value data to deserialise
+var ErrNoDeserialisableData = errors.New("no data found to deserialise")
 
-func fromGobDataBytes(data *gobData, opts ...func(o *TypeRegistryOptions)) (any, error) {
+func (g *gobApproach) fromGobDataBytes(data *gobData, opts ...func(o *TypeRegistryOptions)) (any, error) {
 
 	if data == nil {
 		return nil, ErrNoGobData

@@ -1,8 +1,6 @@
 package serialise
 
 import (
-	"bytes"
-	"encoding/gob"
 	"errors"
 )
 
@@ -52,30 +50,26 @@ const (
 	gobType
 )
 
-// SerialisationApproach represents the available serialisation approaches
-type SerialisationApproach int8
-
-const (
-	// UnknownSerialisation indicates no serialisation has been selected
-	UnknownSerialisation SerialisationApproach = iota
-	// GOB serialisation
-	GOB
-	// MinData indicates bespoke packing to minimise storage, with limited data types
-	MinData
-	// EndOfApproaches indicates the end of the available set of serialisation approaches
-	EndOfApproaches
-)
+// Approach implements the mechanism to be used for serialisation
+type Approach interface {
+	// Name of the approach
+	Name() string
+	// Pack serialises the instance to a byte slice
+	Pack(data any) ([]byte, error)
+	// Unpack deserialises an instance from the byte slice
+	Unpack(data []byte, opts ...func(opt *TypeRegistryOptions)) (any, error)
+}
 
 // SerialisationOptions adjust how serialisation is performed
 type SerialisationOptions struct {
 	// Approach specifies which serialisation method is to be used
-	Approach SerialisationApproach
+	Approach Approach
 	// RegistryOptions allows type registry overrides to be applied
 	RegistryOptions *TypeRegistryOptions
 }
 
 // WithSerialisationApproach sets the serialisation approach to be used when calling ToBytes()
-func WithSerialisationApproach(approach SerialisationApproach) func(*SerialisationOptions) {
+func WithSerialisationApproach(approach Approach) func(*SerialisationOptions) {
 	return func(so *SerialisationOptions) {
 		so.Approach = approach
 	}
@@ -100,16 +94,16 @@ func WithTypeRegistryOptions(opts ...func(*TypeRegistryOptions)) func(*Serialisa
 // ErrUnexpectedSerialisationError raised if an invalid serialisation approach is specified
 var ErrUnexpectedSerialisationError = errors.New("unexpected error during serialisation")
 
-// GOB is the current default serialisation approach
-var defaultSerialisationApproch = GOB
+// MinData is the current default serialisation approach
+var defaultSerialisationApproach = NewMinDataApproach()
 
 // ToBytes returns a byte slice of the provded data.
 // Currently only gob based serialisation is available, but other options may become available, hence
 // the serialisation approach used is returned to guide future deserialisation.
-func ToBytes(data any, opts ...func(*SerialisationOptions)) ([]byte, SerialisationApproach, error) {
+func ToBytes(data any, opts ...func(*SerialisationOptions)) ([]byte, string, error) {
 
 	o := SerialisationOptions{
-		Approach: UnknownSerialisation,
+		Approach: nil,
 		RegistryOptions: &TypeRegistryOptions{
 			Registry: defaultTypeRegistry,
 		},
@@ -118,41 +112,16 @@ func ToBytes(data any, opts ...func(*SerialisationOptions)) ([]byte, Serialisati
 		opt(&o)
 	}
 
-	// Defaults to the current defaultSerialisationApproch value if not specified via opts
-	if o.Approach == UnknownSerialisation {
-		o.Approach = defaultSerialisationApproch
+	// Defaults to the current defaultSerialisationApproach value if not specified via opts
+	if o.Approach == nil {
+		o.Approach = defaultSerialisationApproach
 	}
 
-	var packer func(any) ([]byte, error)
-
-	switch o.Approach {
-	case GOB:
-		packer = func(data any) ([]byte, error) {
-			g, err := toGobDataBytes(data)
-			if err != nil {
-				return nil, err
-			}
-
-			var buf bytes.Buffer
-			encoder := gob.NewEncoder(&buf)
-			if err := encoder.Encode(g); err != nil {
-				return nil, err
-			} else {
-				return buf.Bytes(), nil
-			}
-		}
-	case MinData:
-		packer = toMinDataBytes
-	default:
-		return nil, UnknownSerialisation, ErrUnexpectedSerialisationError
-	}
-
-	b, err := packer(data)
+	b, err := o.Approach.Pack(data)
 	if err != nil {
-		return nil, UnknownSerialisation, err
+		return nil, "", err
 	}
-
-	return b, o.Approach, err
+	return b, o.Approach.Name(), nil
 }
 
 // ErrNoDataToDeserialise raised if nil or empty byte slice is used in FromBytes
@@ -162,13 +131,13 @@ var ErrNoDataToDeserialise = errors.New("no data provided for deserialisation")
 var ErrInvalidSerialisationApproach = errors.New("invalid serialisation approach provided")
 
 // FromBytes returns deserialises the byte slice to an instance using the specified approach.
-func FromBytes(data []byte, approach SerialisationApproach, opts ...func(*SerialisationOptions)) (any, error) {
+func FromBytes(data []byte, approach Approach, opts ...func(*SerialisationOptions)) (any, error) {
 
 	if len(data) == 0 {
 		return nil, ErrNoDataToDeserialise
 	}
 
-	if approach == UnknownSerialisation || approach >= EndOfApproaches {
+	if approach == nil {
 		return nil, ErrInvalidSerialisationApproach
 	}
 
@@ -181,29 +150,5 @@ func FromBytes(data []byte, approach SerialisationApproach, opts ...func(*Serial
 		opt(&o)
 	}
 
-	// Note the options specified approach is ignored for deserialisation
-	switch approach {
-	case GOB:
-
-		var buf = bytes.NewBuffer(data)
-
-		decoder := gob.NewDecoder(buf)
-
-		var g gobData
-
-		err := decoder.Decode(&g)
-		if err != nil {
-			return nil, err
-		}
-
-		v, err := fromGobDataBytes(&g, func(opt *TypeRegistryOptions) { opt.replace(o.RegistryOptions) })
-		if err != nil {
-			return nil, err
-		}
-		return v, err
-	case MinData:
-		return fromMinDataBytes(data)
-	default:
-		return nil, ErrUnexpectedSerialisationError
-	}
+	return approach.Unpack(data, func(opt *TypeRegistryOptions) { opt.replace(o.RegistryOptions) })
 }
