@@ -421,6 +421,16 @@ func TestToBytes(t *testing.T) {
 	var bs []byte = []byte("Hello World")
 	var ss []string = []string{"Hello", "World"}
 	var is8 []int8 = []int8{1, 2, 3, 4}
+	var is16 []int16 = []int16{1, 2, 3, 4}
+	var is32 []int32 = []int32{1, 2, 3, 4}
+	var is64 []int64 = []int64{1, 2, 3, 4}
+	var uis16 []uint16 = []uint16{1, 2, 3, 4}
+	var uis32 []uint32 = []uint32{1, 2, 3, 4}
+	var uis64 []uint64 = []uint64{1, 2, 3, 4}
+	var fs32 []float32 = []float32{1, 2, 3, 4}
+	var fs64 []float64 = []float64{1, 2, 3, 4}
+	var bbs []bool = []bool{false, true, true, false}
+	var tds []time.Duration = []time.Duration{1, 2, 3, 4}
 
 	compareValue := func(a, b any, name string) {
 		if b == nil {
@@ -443,14 +453,20 @@ func TestToBytes(t *testing.T) {
 			testCompareValue[int16](a, b, name, t)
 		case *int16:
 			testComparePtrValue[int16](a, b, name, t)
+		case []int16:
+			testCompareSliceValue[int16](a, b, name, t)
 		case int32:
 			testCompareValue[int32](a, b, name, t)
 		case *int32:
 			testComparePtrValue[int32](a, b, name, t)
+		case []int32:
+			testCompareSliceValue[int32](a, b, name, t)
 		case int64:
 			testCompareValue[int64](a, b, name, t)
 		case *int64:
 			testComparePtrValue[int64](a, b, name, t)
+		case []int64:
+			testCompareSliceValue[int64](a, b, name, t)
 		case uint8:
 			testCompareValue[uint8](a, b, name, t)
 		case *uint8:
@@ -459,30 +475,44 @@ func TestToBytes(t *testing.T) {
 			testCompareValue[uint16](a, b, name, t)
 		case *uint16:
 			testComparePtrValue[uint16](a, b, name, t)
+		case []uint16:
+			testCompareSliceValue[uint16](a, b, name, t)
 		case uint32:
 			testCompareValue[uint32](a, b, name, t)
 		case *uint32:
 			testComparePtrValue[uint32](a, b, name, t)
+		case []uint32:
+			testCompareSliceValue[uint32](a, b, name, t)
 		case uint64:
 			testCompareValue[uint64](a, b, name, t)
 		case *uint64:
 			testComparePtrValue[uint64](a, b, name, t)
+		case []uint64:
+			testCompareSliceValue[uint64](a, b, name, t)
 		case float32:
 			testCompareValue[float32](a, b, name, t)
 		case *float32:
 			testComparePtrValue[float32](a, b, name, t)
+		case []float32:
+			testCompareSliceValue[float32](a, b, name, t)
 		case float64:
 			testCompareValue[float64](a, b, name, t)
 		case *float64:
 			testComparePtrValue[float64](a, b, name, t)
+		case []float64:
+			testCompareSliceValue[float64](a, b, name, t)
 		case bool:
 			testCompareValue[bool](a, b, name, t)
 		case *bool:
 			testComparePtrValue[bool](a, b, name, t)
+		case []bool:
+			testCompareSliceValue[bool](a, b, name, t)
 		case time.Duration:
 			testCompareValue[time.Duration](a, b, name, t)
 		case *time.Duration:
 			testComparePtrValue[time.Duration](a, b, name, t)
+		case []time.Duration:
+			testCompareSliceValue[time.Duration](a, b, name, t)
 		case []string:
 			testCompareSliceValue[string](a, b, name, t)
 		default:
@@ -596,14 +626,54 @@ func TestToBytes(t *testing.T) {
 			bs,
 			"[]byte",
 		},
-		// {
-		// 	ss,
-		// 	"[]string",
-		// },
 		{
 			is8,
 			"[]int8",
 		},
+		{
+			is16,
+			"[]int16",
+		},
+		{
+			is32,
+			"[]int32",
+		},
+		{
+			is64,
+			"[]int64",
+		},
+		{
+			uis16,
+			"[]uint16",
+		},
+		{
+			uis32,
+			"[]uint32",
+		},
+		{
+			uis64,
+			"[]uint64",
+		},
+		{
+			fs32,
+			"[]float32",
+		},
+		{
+			fs64,
+			"[]float64",
+		},
+		{
+			bbs,
+			"[]bool",
+		},
+		{
+			tds,
+			"[]time.Duration",
+		},
+		// {
+		// 	ss,
+		// 	"[]string",
+		// },
 	}
 
 	approach := NewMinDataApproach()

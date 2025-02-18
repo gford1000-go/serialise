@@ -161,14 +161,20 @@ func (m *minData) Unpack(data []byte, opts ...func(opt *TypeRegistryOptions)) (a
 		return unpackMD[int16](data)
 	case pint16Type:
 		return unpackPtr(new(int16), data)
+	case int16SliceType:
+		return unpackSimpleSliceMD[int16](data[1:], 2)
 	case int32Type:
 		return unpackMD[int32](data)
 	case pint32Type:
 		return unpackPtr(new(int32), data)
+	case int32SliceType:
+		return unpackSimpleSliceMD[int32](data[1:], 4)
 	case int64Type:
 		return unpackMD[int64](data)
 	case pint64Type:
 		return unpackPtr(new(int64), data)
+	case int64SliceType:
+		return unpackSimpleSliceMD[int64](data[1:], 8)
 	case uint8Type:
 		return unpackMD[uint8](data)
 	case puint8Type:
@@ -177,30 +183,44 @@ func (m *minData) Unpack(data []byte, opts ...func(opt *TypeRegistryOptions)) (a
 		return unpackMD[uint16](data)
 	case puint16Type:
 		return unpackPtr(new(uint16), data)
+	case uint16SliceType:
+		return unpackSimpleSliceMD[uint16](data[1:], 2)
 	case uint32Type:
 		return unpackMD[uint32](data)
 	case puint32Type:
 		return unpackPtr(new(uint32), data)
+	case uint32SliceType:
+		return unpackSimpleSliceMD[uint32](data[1:], 4)
 	case uint64Type:
 		return unpackMD[uint64](data)
 	case puint64Type:
 		return unpackPtr(new(uint64), data)
+	case uint64SliceType:
+		return unpackSimpleSliceMD[uint64](data[1:], 8)
 	case float32Type:
 		return unpackMD[float32](data)
 	case pfloat32Type:
 		return unpackPtr(new(float32), data)
+	case float32SliceType:
+		return unpackSimpleSliceMD[float32](data[1:], 4)
 	case float64Type:
 		return unpackMD[float64](data)
 	case pfloat64Type:
 		return unpackPtr(new(float64), data)
+	case float64SliceType:
+		return unpackSimpleSliceMD[float64](data[1:], 8)
 	case boolType:
 		return unpackMD[bool](data)
 	case pboolType:
 		return unpackPtr(new(bool), data)
+	case boolSliceType:
+		return unpackSimpleSliceMD[bool](data[1:], 1)
 	case durationType:
 		return unpackMD[time.Duration](data)
 	case pdurationType:
 		return unpackPtr(new(time.Duration), data)
+	case durationSliceType:
+		return unpackSimpleSliceMD[time.Duration](data[1:], 8)
 	case stringType:
 		return string(data[1:]), nil
 	case pstringType:
