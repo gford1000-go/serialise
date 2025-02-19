@@ -117,6 +117,22 @@ func (m *minDataV1) Pack(data any) ([]byte, error) {
 		return buf.Bytes(), nil
 	}
 
+	packTime := func(t TypeID, tm *time.Time) ([]byte, error) {
+		var buf bytes.Buffer
+
+		err := binary.Write(&buf, binary.LittleEndian, t)
+		if err != nil {
+			return nil, err
+		}
+
+		b, err := tm.MarshalBinary()
+		if err != nil {
+			return nil, err
+		}
+
+		return append(buf.Bytes(), b...), nil
+	}
+
 	if data == nil {
 		return pack(NilType, nil)
 	}
@@ -192,6 +208,10 @@ func (m *minDataV1) Pack(data any) ([]byte, error) {
 		return pack(PdurationType, data)
 	case []time.Duration:
 		return packSimpleSliceMD(DurationSliceType, v)
+	case time.Time:
+		return packTime(TimeType, &v)
+	case *time.Time:
+		return packTime(PtimeType, v)
 	case string:
 		return pack(StringType, []byte(v))
 	case *string:
@@ -262,6 +282,15 @@ func (m *minDataV1) Unpack(data []byte) (output any, e error) {
 			offset += 8 + itemSize
 		}
 		return bss, nil
+	}
+
+	unpackTime := func(data []byte) (any, error) {
+		tm := new(time.Time)
+		err := tm.UnmarshalBinary(data)
+		if err != nil {
+			return nil, err
+		}
+		return tm, nil
 	}
 
 	switch t {
@@ -337,6 +366,11 @@ func (m *minDataV1) Unpack(data []byte) (output any, e error) {
 		return unpackPtr(new(time.Duration), data)
 	case DurationSliceType:
 		return unpackSimpleSliceMD[time.Duration](data[1:], 8)
+	case TimeType:
+		tm, err := unpackTime(data[1:])
+		return *(tm.(*time.Time)), err
+	case PtimeType:
+		return unpackTime(data[1:])
 	case StringType:
 		return string(data[1:]), nil
 	case PstringType:

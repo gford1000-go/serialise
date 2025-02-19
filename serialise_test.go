@@ -6,14 +6,33 @@ import (
 	"time"
 )
 
-func testCompareValue[T comparable](a, b any, name string, t *testing.T) {
+func timeNeq(x any, y any) (time.Time, bool, bool) {
+	switch v := x.(type) {
+	case time.Time:
+		return v, v != (y.(time.Time)).Truncate(0), false
+	default:
+		return *new(time.Time), false, true
+	}
+}
+
+func testCompareValue[T comparable](a, b any, name string, t *testing.T, opts ...func(any, any) (T, bool, bool)) {
+
+	neq := func(x any, y any) (T, bool, bool) {
+		if xx, ok := x.(T); ok {
+			return xx, xx != y.(T), false
+		}
+		return *new(T), false, true
+	}
+
+	if len(opts) > 0 {
+		neq = opts[0]
+	}
+
 	switch v := b.(type) {
 	case T:
-		if aa, ok := a.(T); ok {
-			if aa != v {
-				t.Fatalf("Data mismatch: expected %v, got: %v", v, aa)
-			}
-		} else {
+		if aa, test, bad := neq(a, v); test {
+			t.Fatalf("Data mismatch: expected %v, got: %v", v, aa)
+		} else if bad {
 			t.Fatalf("Type mismatch: expected: %s, got: %s", name, fmt.Sprintf("%T", a))
 		}
 	default:
@@ -42,6 +61,7 @@ func testCompareSliceValue[T comparable](a, b any, name string, t *testing.T) {
 }
 
 func testComparePtrValue[T comparable](a, b any, name string, t *testing.T) {
+
 	switch v := b.(type) {
 	case *T:
 		if aa, ok := a.(*T); ok {
@@ -328,6 +348,7 @@ func TestToBytes(t *testing.T) {
 	var fs64 []float64 = []float64{1, 2, 3, 4}
 	var bbs []bool = []bool{false, true, true, false}
 	var tds []time.Duration = []time.Duration{1, 2, 3, 4}
+	var tm time.Time = time.Now()
 
 	compareValue := func(a, b any, name string) {
 		if b == nil {
@@ -410,6 +431,8 @@ func TestToBytes(t *testing.T) {
 			testComparePtrValue[time.Duration](a, b, name, t)
 		case []time.Duration:
 			testCompareSliceValue[time.Duration](a, b, name, t)
+		case time.Time:
+			testCompareValue[time.Time](a, b, name, t, timeNeq)
 		case []string:
 			testCompareSliceValue[string](a, b, name, t)
 		default:
@@ -570,6 +593,10 @@ func TestToBytes(t *testing.T) {
 		{
 			ss,
 			"[]string",
+		},
+		{
+			tm,
+			"time.Time",
 		},
 	}
 
