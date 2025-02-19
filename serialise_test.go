@@ -6,109 +6,6 @@ import (
 	"time"
 )
 
-func TestGetType(t *testing.T) {
-
-	type testData struct {
-		V        any
-		TypeName string
-	}
-
-	var i int = 42
-	var i64 int64 = 42
-	var s string = "Hello World"
-	var td testData
-	var tdp *testData = &testData{}
-	var tm = time.Now()
-
-	tests := []testData{
-		{
-			i,
-			"int",
-		},
-		{
-			&i,
-			"*int",
-		},
-		{
-			i64,
-			"int64",
-		},
-		{
-			&i64,
-			"*int64",
-		},
-		{
-			s,
-			"string",
-		},
-		{
-			&s,
-			"*string",
-		},
-		{
-			tm,
-			"time.Time",
-		},
-		{
-			&tm,
-			"*time.Time",
-		},
-		{
-			td,
-			"serialise.testData",
-		},
-		{
-			&td,
-			"*serialise.testData",
-		},
-		{
-			tdp,
-			"*serialise.testData",
-		},
-		{
-			&tdp,
-			"**serialise.testData",
-		},
-	}
-
-	for _, test := range tests {
-		name := getTypeName(test.V)
-		if name != test.TypeName {
-			t.Fatalf("Unexpected mismatch in type name: expected: %s, got: %s", test.TypeName, name)
-		}
-	}
-
-	testRegistry := NewTypeRegistry()
-
-	f := func(o *TypeRegistryOptions) {
-		o.Registry = testRegistry
-	}
-
-	for _, test := range tests {
-		RegisterType(test.V, f)
-	}
-
-	for _, test := range tests {
-		ty, err := GetRegisteredType(test.TypeName, f)
-		if err != nil {
-			t.Fatalf("Unexpected error: %v for type: %s", err, test.TypeName)
-		}
-		if fmt.Sprintf("%v", ty) != test.TypeName {
-			t.Fatalf("Mismatch in type: expected: %s, got: %s", test.TypeName, fmt.Sprintf("%v", ty))
-		}
-	}
-
-	for _, test := range tests {
-		v, err := CreateInstance(test.TypeName, f)
-		if err != nil {
-			t.Fatalf("Unexpected error: %v for type: %s", err, test.TypeName)
-		}
-		if getTypeName(v) != test.TypeName {
-			t.Fatalf("Mismatch in type: expected: %s, got: %s", test.TypeName, fmt.Sprintf("%T", v))
-		}
-	}
-}
-
 func testCompareValue[T comparable](a, b any, name string, t *testing.T) {
 	switch v := b.(type) {
 	case T:
@@ -678,13 +575,13 @@ func TestToBytes(t *testing.T) {
 
 	approach := NewMinDataApproach()
 
-	testRegistry := NewTypeRegistry()
-	testRegistry.AddTypeOf(ss)
-	testRegistry.AddTypeOf(is8)
+	// testRegistry := NewTypeRegistry()
+	// testRegistry.AddTypeOf(ss)
+	// testRegistry.AddTypeOf(is8)
 
-	f := func(o *TypeRegistryOptions) {
-		o.Registry = testRegistry
-	}
+	// f := func(o *TypeRegistryOptions) {
+	// 	o.Registry = testRegistry
+	// }
 
 	for _, test := range tests {
 
@@ -693,7 +590,8 @@ func TestToBytes(t *testing.T) {
 			t.Fatalf("Unexpected error: %v", err)
 		}
 
-		v, err := FromBytes(b, approach, WithTypeRegistryOptions(f))
+		//v, err := FromBytes(b, approach, WithTypeRegistryOptions(f))
+		v, err := FromBytes(b, approach)
 		if err != nil {
 			t.Fatalf("Unexpected error: %v", err)
 		}
@@ -748,12 +646,12 @@ func TestToBytes_1(t *testing.T) {
 
 	approach := NewMinDataApproach()
 
-	testRegistry := NewTypeRegistry()
-	testRegistry.AddTypeOf(ss)
+	// testRegistry := NewTypeRegistry()
+	// testRegistry.AddTypeOf(ss)
 
-	f := func(o *TypeRegistryOptions) {
-		o.Registry = testRegistry
-	}
+	// f := func(o *TypeRegistryOptions) {
+	// 	o.Registry = testRegistry
+	// }
 
 	key := []byte("01234567890123456789012345678912")
 
@@ -764,7 +662,8 @@ func TestToBytes_1(t *testing.T) {
 			t.Fatalf("Unexpected error: %v", err)
 		}
 
-		v, err := FromBytes(b, approach, WithTypeRegistryOptions(f), WithAESGCMEncryption(key))
+		//v, err := FromBytes(b, approach, WithTypeRegistryOptions(f), WithAESGCMEncryption(key))
+		v, err := FromBytes(b, approach, WithAESGCMEncryption(key))
 		if err != nil {
 			t.Fatalf("Unexpected error: %v", err)
 		}

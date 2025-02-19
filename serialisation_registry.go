@@ -17,7 +17,7 @@ func init() {
 		m: map[string]Approach{},
 	}
 
-	RegisterApproach(NewGOBApproach())
+	// RegisterApproach(NewGOBApproach())
 	RegisterApproach(NewMinDataApproach())
 }
 

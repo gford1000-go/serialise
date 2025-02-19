@@ -192,7 +192,8 @@ var ErrMinDataTypeNotDeserialisable = errors.New("type specified within the data
 var ErrUnexpectedDeserialisationError = errors.New("unexpected deserialisation failure - possible corrupted data provided")
 
 // Unpack deserialises an instance from the byte slice
-func (m *minData) Unpack(data []byte, opts ...func(opt *TypeRegistryOptions)) (output any, e error) {
+// func (m *minData) Unpack(data []byte, opts ...func(opt *TypeRegistryOptions)) (output any, e error) {
+func (m *minData) Unpack(data []byte) (output any, e error) {
 
 	defer func() {
 		if r := recover(); r != nil {

@@ -4,6 +4,7 @@ import (
 	"errors"
 )
 
+// TypeID identifies the types that are supported by serialisation
 type TypeID int8
 
 const (
@@ -61,7 +62,8 @@ type Approach interface {
 	// Pack serialises the instance to a byte slice
 	Pack(data any) ([]byte, error)
 	// Unpack deserialises an instance from the byte slice
-	Unpack(data []byte, opts ...func(opt *TypeRegistryOptions)) (any, error)
+	//Unpack(data []byte, opts ...func(opt *TypeRegistryOptions)) (any, error)
+	Unpack(data []byte) (any, error)
 	// IsSerialisable returns true if the type of the instance is serialisable
 	IsSerialisable(v any) bool
 }
@@ -70,8 +72,6 @@ type Approach interface {
 type SerialisationOptions struct {
 	// Approach specifies which serialisation method is to be used
 	Approach Approach
-	// RegistryOptions allows type registry overrides to be applied
-	RegistryOptions *TypeRegistryOptions
 	// Encryptor will encrypt the provided data
 	Encryptor func(data []byte) ([]byte, error)
 	// Decryptor will decrypt the provided data
@@ -82,22 +82,6 @@ type SerialisationOptions struct {
 func WithSerialisationApproach(approach Approach) func(*SerialisationOptions) {
 	return func(so *SerialisationOptions) {
 		so.Approach = approach
-	}
-}
-
-// WithTypeRegistryOptions sets the type registry options to be used when calling FromBytes()
-func WithTypeRegistryOptions(opts ...func(*TypeRegistryOptions)) func(*SerialisationOptions) {
-
-	o := &TypeRegistryOptions{}
-	for _, opt := range opts {
-		opt(o)
-	}
-	if o.Registry == nil {
-		o.Registry = defaultTypeRegistry
-	}
-
-	return func(so *SerialisationOptions) {
-		so.RegistryOptions = o
 	}
 }
 
@@ -112,12 +96,7 @@ var defaultSerialisationApproach = NewMinDataApproach()
 // the serialisation approach used is returned to guide future deserialisation.
 func ToBytes(data any, opts ...func(*SerialisationOptions)) ([]byte, string, error) {
 
-	o := SerialisationOptions{
-		Approach: nil,
-		RegistryOptions: &TypeRegistryOptions{
-			Registry: defaultTypeRegistry,
-		},
-	}
+	o := SerialisationOptions{}
 	for _, opt := range opts {
 		opt(&o)
 	}
@@ -160,11 +139,7 @@ func FromBytes(data []byte, approach Approach, opts ...func(*SerialisationOption
 		return nil, ErrInvalidSerialisationApproach
 	}
 
-	o := SerialisationOptions{
-		RegistryOptions: &TypeRegistryOptions{
-			Registry: defaultTypeRegistry,
-		},
-	}
+	o := SerialisationOptions{}
 	for _, opt := range opts {
 		opt(&o)
 	}
@@ -179,5 +154,6 @@ func FromBytes(data []byte, approach Approach, opts ...func(*SerialisationOption
 		}
 	}
 
-	return approach.Unpack(b, func(opt *TypeRegistryOptions) { opt.replace(o.RegistryOptions) })
+	//return approach.Unpack(b, func(opt *TypeRegistryOptions) { opt.replace(o.RegistryOptions) })
+	return approach.Unpack(b)
 }
