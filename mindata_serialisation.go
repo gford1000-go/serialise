@@ -92,94 +92,94 @@ func (m *minData) Pack(data any) ([]byte, error) {
 	}
 
 	if data == nil {
-		return pack(nilType, nil)
+		return pack(NilType, nil)
 	}
 
 	switch v := data.(type) {
 	case int8:
-		return pack(int8Type, data)
+		return pack(Int8Type, data)
 	case *int8:
-		return pack(pint8Type, data)
+		return pack(Pint8Type, data)
 	case []int8:
-		return packSimpleSliceMD(int8SliceType, v)
+		return packSimpleSliceMD(Int8SliceType, v)
 	case int16:
-		return pack(int16Type, data)
+		return pack(Int16Type, data)
 	case *int16:
-		return pack(pint16Type, data)
+		return pack(Pint16Type, data)
 	case []int16:
-		return packSimpleSliceMD(int16SliceType, v)
+		return packSimpleSliceMD(Int16SliceType, v)
 	case int32:
-		return pack(int32Type, data)
+		return pack(Int32Type, data)
 	case *int32:
-		return pack(pint32Type, data)
+		return pack(Pint32Type, data)
 	case []int32:
-		return packSimpleSliceMD(int32SliceType, v)
+		return packSimpleSliceMD(Int32SliceType, v)
 	case int64:
-		return pack(int64Type, data)
+		return pack(Int64Type, data)
 	case *int64:
-		return pack(pint64Type, data)
+		return pack(Pint64Type, data)
 	case []int64:
-		return packSimpleSliceMD(int64SliceType, v)
+		return packSimpleSliceMD(Int64SliceType, v)
 	case uint8:
-		return pack(uint8Type, data)
+		return pack(Uint8Type, data)
 	case *uint8:
-		return pack(puint8Type, data)
+		return pack(Puint8Type, data)
 	case uint16:
-		return pack(uint16Type, data)
+		return pack(Uint16Type, data)
 	case *uint16:
-		return pack(puint16Type, data)
+		return pack(Puint16Type, data)
 	case []uint16:
-		return packSimpleSliceMD(uint16SliceType, v)
+		return packSimpleSliceMD(Uint16SliceType, v)
 	case uint32:
-		return pack(uint32Type, data)
+		return pack(Uint32Type, data)
 	case *uint32:
-		return pack(puint32Type, data)
+		return pack(Puint32Type, data)
 	case []uint32:
-		return packSimpleSliceMD(uint32SliceType, v)
+		return packSimpleSliceMD(Uint32SliceType, v)
 	case uint64:
-		return pack(uint64Type, data)
+		return pack(Uint64Type, data)
 	case *uint64:
-		return pack(puint64Type, data)
+		return pack(Puint64Type, data)
 	case []uint64:
-		return packSimpleSliceMD(uint64SliceType, v)
+		return packSimpleSliceMD(Uint64SliceType, v)
 	case float32:
-		return pack(float32Type, data)
+		return pack(Float32Type, data)
 	case *float32:
-		return pack(pfloat32Type, data)
+		return pack(Pfloat32Type, data)
 	case []float32:
-		return packSimpleSliceMD(float32SliceType, v)
+		return packSimpleSliceMD(Float32SliceType, v)
 	case float64:
-		return pack(float64Type, data)
+		return pack(Float64Type, data)
 	case *float64:
-		return pack(pfloat64Type, data)
+		return pack(Pfloat64Type, data)
 	case []float64:
-		return packSimpleSliceMD(float64SliceType, v)
+		return packSimpleSliceMD(Float64SliceType, v)
 	case bool:
-		return pack(boolType, data)
+		return pack(BoolType, data)
 	case *bool:
-		return pack(pboolType, data)
+		return pack(PboolType, data)
 	case []bool:
-		return packSimpleSliceMD(boolSliceType, v)
+		return packSimpleSliceMD(BoolSliceType, v)
 	case time.Duration:
-		return pack(durationType, data)
+		return pack(DurationType, data)
 	case *time.Duration:
-		return pack(pdurationType, data)
+		return pack(PdurationType, data)
 	case []time.Duration:
-		return packSimpleSliceMD(durationSliceType, v)
+		return packSimpleSliceMD(DurationSliceType, v)
 	case string:
-		return pack(stringType, []byte(v))
+		return pack(StringType, []byte(v))
 	case *string:
-		return pack(pstringType, []byte(*v))
+		return pack(PstringType, []byte(*v))
 	case []string:
 		var bss [][]byte = make([][]byte, len(v))
 		for i := 0; i < len(v); i++ {
 			bss[i] = []byte(v[i])
 		}
-		return packByteSliceSlice(stringSliceType, bss)
+		return packByteSliceSlice(StringSliceType, bss)
 	case []byte:
-		return pack(byteSliceType, v)
+		return pack(ByteSliceType, v)
 	case [][]byte:
-		return packByteSliceSlice(byteSliceSliceType, v)
+		return packByteSliceSlice(ByteSliceSliceType, v)
 	default:
 		return nil, ErrMinDataTypeNotSerialisable
 	}
@@ -238,88 +238,88 @@ func (m *minData) Unpack(data []byte, opts ...func(opt *TypeRegistryOptions)) (o
 	}
 
 	switch t {
-	case nilType:
+	case NilType:
 		return nil, nil
-	case int8Type:
+	case Int8Type:
 		return unpackMD[int8](data)
-	case pint8Type:
+	case Pint8Type:
 		return unpackPtr(new(int8), data)
-	case int8SliceType:
+	case Int8SliceType:
 		return unpackSimpleSliceMD[int8](data[1:], 1)
-	case int16Type:
+	case Int16Type:
 		return unpackMD[int16](data)
-	case pint16Type:
+	case Pint16Type:
 		return unpackPtr(new(int16), data)
-	case int16SliceType:
+	case Int16SliceType:
 		return unpackSimpleSliceMD[int16](data[1:], 2)
-	case int32Type:
+	case Int32Type:
 		return unpackMD[int32](data)
-	case pint32Type:
+	case Pint32Type:
 		return unpackPtr(new(int32), data)
-	case int32SliceType:
+	case Int32SliceType:
 		return unpackSimpleSliceMD[int32](data[1:], 4)
-	case int64Type:
+	case Int64Type:
 		return unpackMD[int64](data)
-	case pint64Type:
+	case Pint64Type:
 		return unpackPtr(new(int64), data)
-	case int64SliceType:
+	case Int64SliceType:
 		return unpackSimpleSliceMD[int64](data[1:], 8)
-	case uint8Type:
+	case Uint8Type:
 		return unpackMD[uint8](data)
-	case puint8Type:
+	case Puint8Type:
 		return unpackPtr(new(uint8), data)
-	case uint16Type:
+	case Uint16Type:
 		return unpackMD[uint16](data)
-	case puint16Type:
+	case Puint16Type:
 		return unpackPtr(new(uint16), data)
-	case uint16SliceType:
+	case Uint16SliceType:
 		return unpackSimpleSliceMD[uint16](data[1:], 2)
-	case uint32Type:
+	case Uint32Type:
 		return unpackMD[uint32](data)
-	case puint32Type:
+	case Puint32Type:
 		return unpackPtr(new(uint32), data)
-	case uint32SliceType:
+	case Uint32SliceType:
 		return unpackSimpleSliceMD[uint32](data[1:], 4)
-	case uint64Type:
+	case Uint64Type:
 		return unpackMD[uint64](data)
-	case puint64Type:
+	case Puint64Type:
 		return unpackPtr(new(uint64), data)
-	case uint64SliceType:
+	case Uint64SliceType:
 		return unpackSimpleSliceMD[uint64](data[1:], 8)
-	case float32Type:
+	case Float32Type:
 		return unpackMD[float32](data)
-	case pfloat32Type:
+	case Pfloat32Type:
 		return unpackPtr(new(float32), data)
-	case float32SliceType:
+	case Float32SliceType:
 		return unpackSimpleSliceMD[float32](data[1:], 4)
-	case float64Type:
+	case Float64Type:
 		return unpackMD[float64](data)
-	case pfloat64Type:
+	case Pfloat64Type:
 		return unpackPtr(new(float64), data)
-	case float64SliceType:
+	case Float64SliceType:
 		return unpackSimpleSliceMD[float64](data[1:], 8)
-	case boolType:
+	case BoolType:
 		return unpackMD[bool](data)
-	case pboolType:
+	case PboolType:
 		return unpackPtr(new(bool), data)
-	case boolSliceType:
+	case BoolSliceType:
 		return unpackSimpleSliceMD[bool](data[1:], 1)
-	case durationType:
+	case DurationType:
 		return unpackMD[time.Duration](data)
-	case pdurationType:
+	case PdurationType:
 		return unpackPtr(new(time.Duration), data)
-	case durationSliceType:
+	case DurationSliceType:
 		return unpackSimpleSliceMD[time.Duration](data[1:], 8)
-	case stringType:
+	case StringType:
 		return string(data[1:]), nil
-	case pstringType:
+	case PstringType:
 		s := string(data[1:])
 		return &s, nil
-	case byteSliceType:
+	case ByteSliceType:
 		return data[1:], nil
-	case byteSliceSliceType:
+	case ByteSliceSliceType:
 		return unpackByteSliceSlice(data[1:])
-	case stringSliceType:
+	case StringSliceType:
 		bss, err := unpackByteSliceSlice(data[1:])
 		if err != nil {
 			return nil, err

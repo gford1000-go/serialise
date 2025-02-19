@@ -386,16 +386,16 @@ func runSliceTest[T comparable](st int8, data []T, eleSize int64, t *testing.T) 
 
 func TestPackSlice(t *testing.T) {
 
-	runSliceTest(int8SliceType, []int8{43, 21, 54}, 1, t)
-	runSliceTest(int16SliceType, []int16{43, 21, 54}, 2, t)
-	runSliceTest(int32SliceType, []int32{43, 21, 54}, 4, t)
-	runSliceTest(int64SliceType, []int64{43, 21, 54}, 8, t)
-	runSliceTest(uint16SliceType, []uint16{43, 21, 54}, 2, t)
-	runSliceTest(uint32SliceType, []uint32{43, 21, 54}, 4, t)
-	runSliceTest(uint64SliceType, []uint64{43, 21, 54}, 8, t)
-	runSliceTest(float32SliceType, []float32{43, 21, 54}, 4, t)
-	runSliceTest(float64SliceType, []float64{43, 21, 54}, 8, t)
-	runSliceTest(boolSliceType, []bool{true, true, false}, 1, t)
+	runSliceTest(Int8SliceType, []int8{43, 21, 54}, 1, t)
+	runSliceTest(Int16SliceType, []int16{43, 21, 54}, 2, t)
+	runSliceTest(Int32SliceType, []int32{43, 21, 54}, 4, t)
+	runSliceTest(Int64SliceType, []int64{43, 21, 54}, 8, t)
+	runSliceTest(Uint16SliceType, []uint16{43, 21, 54}, 2, t)
+	runSliceTest(Uint32SliceType, []uint32{43, 21, 54}, 4, t)
+	runSliceTest(Uint64SliceType, []uint64{43, 21, 54}, 8, t)
+	runSliceTest(Float32SliceType, []float32{43, 21, 54}, 4, t)
+	runSliceTest(Float64SliceType, []float64{43, 21, 54}, 8, t)
+	runSliceTest(BoolSliceType, []bool{true, true, false}, 1, t)
 
 }
 

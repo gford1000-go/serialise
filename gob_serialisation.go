@@ -82,102 +82,102 @@ type gobData struct {
 // toGobDataBytes serialises data types to []byte using gob encoding
 func (g *gobApproach) toGobDataBytes(data any) (*gobData, error) {
 	if data == nil {
-		return &gobData{DataType: nilType, Data: []byte{}}, nil
+		return &gobData{DataType: NilType, Data: []byte{}}, nil
 	}
 
 	var buf bytes.Buffer
 
 	switch v := data.(type) {
 	case []byte:
-		return &gobData{DataType: byteSliceType, Data: v}, nil
+		return &gobData{DataType: ByteSliceType, Data: v}, nil
 	case int8:
 		err := binary.Write(&buf, binary.LittleEndian, v)
-		return &gobData{DataType: int8Type, Data: buf.Bytes()}, err
+		return &gobData{DataType: Int8Type, Data: buf.Bytes()}, err
 	case *int8:
 		err := binary.Write(&buf, binary.LittleEndian, *v)
-		return &gobData{DataType: pint8Type, Data: buf.Bytes()}, err
+		return &gobData{DataType: Pint8Type, Data: buf.Bytes()}, err
 	case int16:
 		err := binary.Write(&buf, binary.LittleEndian, v)
-		return &gobData{DataType: int16Type, Data: buf.Bytes()}, err
+		return &gobData{DataType: Int16Type, Data: buf.Bytes()}, err
 	case *int16:
 		err := binary.Write(&buf, binary.LittleEndian, *v)
-		return &gobData{DataType: pint16Type, Data: buf.Bytes()}, err
+		return &gobData{DataType: Pint16Type, Data: buf.Bytes()}, err
 	case int32:
 		err := binary.Write(&buf, binary.LittleEndian, v)
-		return &gobData{DataType: int32Type, Data: buf.Bytes()}, err
+		return &gobData{DataType: Int32Type, Data: buf.Bytes()}, err
 	case *int32:
 		err := binary.Write(&buf, binary.LittleEndian, *v)
-		return &gobData{DataType: pint32Type, Data: buf.Bytes()}, err
+		return &gobData{DataType: Pint32Type, Data: buf.Bytes()}, err
 	case int64:
 		err := binary.Write(&buf, binary.LittleEndian, v)
-		return &gobData{DataType: int64Type, Data: buf.Bytes()}, err
+		return &gobData{DataType: Int64Type, Data: buf.Bytes()}, err
 	case *int64:
 		err := binary.Write(&buf, binary.LittleEndian, *v)
-		return &gobData{DataType: pint64Type, Data: buf.Bytes()}, err
+		return &gobData{DataType: Pint64Type, Data: buf.Bytes()}, err
 	case uint8:
 		err := binary.Write(&buf, binary.LittleEndian, v)
-		return &gobData{DataType: uint8Type, Data: buf.Bytes()}, err
+		return &gobData{DataType: Uint8Type, Data: buf.Bytes()}, err
 	case *uint8:
 		err := binary.Write(&buf, binary.LittleEndian, *v)
-		return &gobData{DataType: puint8Type, Data: buf.Bytes()}, err
+		return &gobData{DataType: Puint8Type, Data: buf.Bytes()}, err
 	case uint16:
 		err := binary.Write(&buf, binary.LittleEndian, v)
-		return &gobData{DataType: uint16Type, Data: buf.Bytes()}, err
+		return &gobData{DataType: Uint16Type, Data: buf.Bytes()}, err
 	case *uint16:
 		err := binary.Write(&buf, binary.LittleEndian, *v)
-		return &gobData{DataType: puint16Type, Data: buf.Bytes()}, err
+		return &gobData{DataType: Puint16Type, Data: buf.Bytes()}, err
 	case uint32:
 		err := binary.Write(&buf, binary.LittleEndian, v)
-		return &gobData{DataType: uint32Type, Data: buf.Bytes()}, err
+		return &gobData{DataType: Uint32Type, Data: buf.Bytes()}, err
 	case *uint32:
 		err := binary.Write(&buf, binary.LittleEndian, *v)
-		return &gobData{DataType: puint32Type, Data: buf.Bytes()}, err
+		return &gobData{DataType: Puint32Type, Data: buf.Bytes()}, err
 	case uint64:
 		err := binary.Write(&buf, binary.LittleEndian, v)
-		return &gobData{DataType: uint64Type, Data: buf.Bytes()}, err
+		return &gobData{DataType: Uint64Type, Data: buf.Bytes()}, err
 	case *uint64:
 		err := binary.Write(&buf, binary.LittleEndian, *v)
-		return &gobData{DataType: puint64Type, Data: buf.Bytes()}, err
+		return &gobData{DataType: Puint64Type, Data: buf.Bytes()}, err
 	case float32:
 		err := binary.Write(&buf, binary.LittleEndian, v)
-		return &gobData{DataType: float32Type, Data: buf.Bytes()}, err
+		return &gobData{DataType: Float32Type, Data: buf.Bytes()}, err
 	case *float32:
 		err := binary.Write(&buf, binary.LittleEndian, *v)
-		return &gobData{DataType: pfloat32Type, Data: buf.Bytes()}, err
+		return &gobData{DataType: Pfloat32Type, Data: buf.Bytes()}, err
 	case float64:
 		err := binary.Write(&buf, binary.LittleEndian, v)
-		return &gobData{DataType: float64Type, Data: buf.Bytes()}, err
+		return &gobData{DataType: Float64Type, Data: buf.Bytes()}, err
 	case *float64:
 		err := binary.Write(&buf, binary.LittleEndian, *v)
-		return &gobData{DataType: pfloat64Type, Data: buf.Bytes()}, err
+		return &gobData{DataType: Pfloat64Type, Data: buf.Bytes()}, err
 	case bool:
 		err := binary.Write(&buf, binary.LittleEndian, v)
-		return &gobData{DataType: boolType, Data: buf.Bytes()}, err
+		return &gobData{DataType: BoolType, Data: buf.Bytes()}, err
 	case *bool:
 		err := binary.Write(&buf, binary.LittleEndian, *v)
-		return &gobData{DataType: pboolType, Data: buf.Bytes()}, err
+		return &gobData{DataType: PboolType, Data: buf.Bytes()}, err
 	case time.Duration:
 		err := binary.Write(&buf, binary.LittleEndian, v)
-		return &gobData{DataType: durationType, Data: buf.Bytes()}, err
+		return &gobData{DataType: DurationType, Data: buf.Bytes()}, err
 	case *time.Duration:
 		err := binary.Write(&buf, binary.LittleEndian, *v)
-		return &gobData{DataType: pdurationType, Data: buf.Bytes()}, err
+		return &gobData{DataType: PdurationType, Data: buf.Bytes()}, err
 	case string:
 		_, err := buf.WriteString(v)
-		return &gobData{DataType: stringType, Data: buf.Bytes()}, err
+		return &gobData{DataType: StringType, Data: buf.Bytes()}, err
 	case *string:
 		_, err := buf.WriteString(*v)
-		return &gobData{DataType: pstringType, Data: buf.Bytes()}, err
+		return &gobData{DataType: PstringType, Data: buf.Bytes()}, err
 	case time.Time:
 		b, err := v.GobEncode()
-		return &gobData{DataType: timeType, Data: b}, err
+		return &gobData{DataType: TimeType, Data: b}, err
 	case *time.Time:
 		b, err := v.GobEncode()
-		return &gobData{DataType: ptimeType, Data: b}, err
+		return &gobData{DataType: PtimeType, Data: b}, err
 	default:
 		encoder := gob.NewEncoder(&buf)
 		err := encoder.Encode(data)
-		return &gobData{DataType: gobType, TypeName: fmt.Sprintf("%T", data), Data: buf.Bytes()}, err
+		return &gobData{DataType: GobType, TypeName: fmt.Sprintf("%T", data), Data: buf.Bytes()}, err
 	}
 }
 
@@ -195,7 +195,7 @@ func (g *gobApproach) fromGobDataBytes(data *gobData, opts ...func(o *TypeRegist
 
 	if len(data.Data) == 0 {
 		switch data.DataType {
-		case nilType:
+		case NilType:
 			return nil, nil
 
 		default:
@@ -203,110 +203,110 @@ func (g *gobApproach) fromGobDataBytes(data *gobData, opts ...func(o *TypeRegist
 		}
 	}
 
-	if data.DataType == byteSliceType {
+	if data.DataType == ByteSliceType {
 		return data.Data, nil
 	}
 
 	var buf = bytes.NewBuffer(data.Data)
 
 	switch data.DataType {
-	case int8Type:
+	case Int8Type:
 		var v int8
 		err := binary.Read(buf, binary.LittleEndian, &v)
 		return v, err
-	case pint8Type:
+	case Pint8Type:
 		v := new(int8)
 		err := binary.Read(buf, binary.LittleEndian, v)
 		return v, err
-	case int16Type:
+	case Int16Type:
 		var v int16
 		err := binary.Read(buf, binary.LittleEndian, &v)
 		return v, err
-	case pint16Type:
+	case Pint16Type:
 		v := new(int16)
 		err := binary.Read(buf, binary.LittleEndian, v)
 		return v, err
-	case int32Type:
+	case Int32Type:
 		var v int32
 		err := binary.Read(buf, binary.LittleEndian, &v)
 		return v, err
-	case pint32Type:
+	case Pint32Type:
 		v := new(int32)
 		err := binary.Read(buf, binary.LittleEndian, v)
 		return v, err
-	case int64Type:
+	case Int64Type:
 		var v int64
 		err := binary.Read(buf, binary.LittleEndian, &v)
 		return v, err
-	case pint64Type:
+	case Pint64Type:
 		v := new(int64)
 		err := binary.Read(buf, binary.LittleEndian, v)
 		return v, err
-	case uint8Type:
+	case Uint8Type:
 		var v uint8
 		err := binary.Read(buf, binary.LittleEndian, &v)
 		return v, err
-	case puint8Type:
+	case Puint8Type:
 		v := new(uint8)
 		err := binary.Read(buf, binary.LittleEndian, v)
 		return v, err
-	case uint16Type:
+	case Uint16Type:
 		var v uint16
 		err := binary.Read(buf, binary.LittleEndian, &v)
 		return v, err
-	case puint16Type:
+	case Puint16Type:
 		v := new(uint16)
 		err := binary.Read(buf, binary.LittleEndian, v)
 		return v, err
-	case uint32Type:
+	case Uint32Type:
 		var v uint32
 		err := binary.Read(buf, binary.LittleEndian, &v)
 		return v, err
-	case puint32Type:
+	case Puint32Type:
 		v := new(uint32)
 		err := binary.Read(buf, binary.LittleEndian, v)
 		return v, err
-	case uint64Type:
+	case Uint64Type:
 		var v uint64
 		err := binary.Read(buf, binary.LittleEndian, &v)
 		return v, err
-	case puint64Type:
+	case Puint64Type:
 		v := new(uint64)
 		err := binary.Read(buf, binary.LittleEndian, v)
 		return v, err
-	case float32Type:
+	case Float32Type:
 		var v float32
 		err := binary.Read(buf, binary.LittleEndian, &v)
 		return v, err
-	case pfloat32Type:
+	case Pfloat32Type:
 		v := new(float32)
 		err := binary.Read(buf, binary.LittleEndian, v)
 		return v, err
-	case float64Type:
+	case Float64Type:
 		var v float64
 		err := binary.Read(buf, binary.LittleEndian, &v)
 		return v, err
-	case pfloat64Type:
+	case Pfloat64Type:
 		v := new(float64)
 		err := binary.Read(buf, binary.LittleEndian, v)
 		return v, err
-	case boolType:
+	case BoolType:
 		var v bool
 		err := binary.Read(buf, binary.LittleEndian, &v)
 		return v, err
-	case pboolType:
+	case PboolType:
 		v := new(bool)
 		err := binary.Read(buf, binary.LittleEndian, v)
 		return v, err
-	case durationType:
+	case DurationType:
 		var v time.Duration
 		err := binary.Read(buf, binary.LittleEndian, &v)
 		return v, err
-	case pdurationType:
+	case PdurationType:
 		v := new(time.Duration)
 		err := binary.Read(buf, binary.LittleEndian, v)
 		return v, err
-	case gobType:
+	case GobType:
 		var buf = bytes.NewBuffer(data.Data)
 
 		v, err := CreateInstancePtr(data.TypeName, opts...)
