@@ -41,7 +41,7 @@ var ErrMinDataTypeNotSerialisable = errors.New("type of argument is not serialis
 // Pack serialises the instance to a byte slice
 func (m *minData) Pack(data any) ([]byte, error) {
 
-	pack := func(t int8, data any) ([]byte, error) {
+	pack := func(t TypeID, data any) ([]byte, error) {
 		var tbuf bytes.Buffer
 		var vbuf bytes.Buffer
 
@@ -61,7 +61,7 @@ func (m *minData) Pack(data any) ([]byte, error) {
 		return append(tbuf.Bytes(), vbuf.Bytes()...), nil
 	}
 
-	packByteSliceSlice := func(t int8, data [][]byte) ([]byte, error) {
+	packByteSliceSlice := func(t TypeID, data [][]byte) ([]byte, error) {
 		var buf bytes.Buffer
 
 		err := binary.Write(&buf, binary.LittleEndian, t)
@@ -201,7 +201,7 @@ func (m *minData) Unpack(data []byte, opts ...func(opt *TypeRegistryOptions)) (o
 		}
 	}()
 
-	var t int8
+	var t TypeID
 	err := binary.Read(bytes.NewBuffer(data[0:1]), binary.LittleEndian, &t)
 	if err != nil {
 		return nil, err
@@ -334,7 +334,7 @@ func (m *minData) Unpack(data []byte, opts ...func(opt *TypeRegistryOptions)) (o
 	}
 }
 
-func packSimpleSliceMD[T any](t int8, data []T) ([]byte, error) {
+func packSimpleSliceMD[T any](t TypeID, data []T) ([]byte, error) {
 	var buf bytes.Buffer
 
 	err := binary.Write(&buf, binary.LittleEndian, t)

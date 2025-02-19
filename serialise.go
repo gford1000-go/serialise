@@ -4,8 +4,10 @@ import (
 	"errors"
 )
 
+type TypeID int8
+
 const (
-	UnknownType int8 = iota
+	UnknownType TypeID = iota
 	Int8Type
 	Pint8Type
 	Int8SliceType

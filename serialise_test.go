@@ -355,7 +355,7 @@ func TestToMinBytes(t *testing.T) {
 	}
 }
 
-func runSliceTest[T comparable](st int8, data []T, eleSize int64, t *testing.T) {
+func runSliceTest[T comparable](st TypeID, data []T, eleSize int64, t *testing.T) {
 
 	b, err := packSimpleSliceMD(st, data)
 	if err != nil {

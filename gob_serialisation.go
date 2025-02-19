@@ -74,7 +74,7 @@ func (g *gobApproach) Unpack(data []byte, opts ...func(opt *TypeRegistryOptions)
 }
 
 type gobData struct {
-	DataType int8
+	DataType TypeID
 	TypeName string
 	Data     []byte
 }
