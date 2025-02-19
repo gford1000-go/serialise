@@ -7,10 +7,19 @@ Serialises basic types, pointers to types, and slices to a byte slice.
 
 Allows the serialisation approach to be extended via the `Approach` interface.
 
-Supports optional encryption of the byte slice.
+Supports optional encryption of the byte slice using `aes-gcm`.
 
 ```go
 func main() {
-    // TO DO
+    data := []string{"Hello", "World!"}
+
+    // Serialise the data using the default version of MinData serialisation
+    b, name, _ := ToBytes(data, WithSerialisationApproach(NewMinDataApproach()))
+
+    // Retrieve the Approach used for serialisation, from the returned name
+    approach, _ := GetApproach(name)
+
+    // Deserialise
+    v, _ := FromBytes(b, approach)
 }
 ```
