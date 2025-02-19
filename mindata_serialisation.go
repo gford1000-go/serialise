@@ -4,27 +4,53 @@ import (
 	"bytes"
 	"encoding/binary"
 	"errors"
+	"fmt"
 	"time"
 )
 
-// MinDataApproach creates an Approach instance
-// that uses minimum byte storage during serialisation
-// Only basic built-in types are supported.
+// MinDataVersion describes a version of a MinData serialisation implementation
+// All breaking changes to serialisation will trigger an increment, to ensure
+// backwards compatibility to any consumers of existing versions.
+type MinDataVersion int8
+
+const (
+	UnknownVersion MinDataVersion = iota
+	V1
+	OutOfRange
+)
+
+var defaultVersion MinDataVersion = V1
+
+// NewMinDataApproach creates an instance of the
+// current default version of the MinData serialisation
 func NewMinDataApproach() Approach {
-	return &minData{}
+	return NewMinDataApproachWithVersion(defaultVersion)
 }
 
-type minData struct {
+// NewMinDataApproachWithVersion creates an instance of the
+// specified version of MinData serialisation
+func NewMinDataApproachWithVersion(version MinDataVersion) Approach {
+	switch version {
+	case V1:
+		name := "MD1"
+		return &minDataV1{name: name}
+	default:
+		panic(fmt.Sprintf("Illegal MinDataVersion passed to NewMinDataApproach (%d)", version))
+	}
+}
+
+type minDataV1 struct {
+	name string
 }
 
 // Name of the approach
-func (m *minData) Name() string {
-	return "MD1"
+func (m *minDataV1) Name() string {
+	return m.name
 }
 
 // IsSerialisable returns true if an instance of the specified type
 // can be serialised
-func (m *minData) IsSerialisable(v any) (ok bool) {
+func (m *minDataV1) IsSerialisable(v any) (ok bool) {
 	defer func() {
 		if r := recover(); r != nil {
 			ok = false
@@ -39,7 +65,7 @@ func (m *minData) IsSerialisable(v any) (ok bool) {
 var ErrMinDataTypeNotSerialisable = errors.New("type of argument is not serialisable")
 
 // Pack serialises the instance to a byte slice
-func (m *minData) Pack(data any) ([]byte, error) {
+func (m *minDataV1) Pack(data any) ([]byte, error) {
 
 	pack := func(t TypeID, data any) ([]byte, error) {
 		var tbuf bytes.Buffer
@@ -193,7 +219,7 @@ var ErrUnexpectedDeserialisationError = errors.New("unexpected deserialisation f
 
 // Unpack deserialises an instance from the byte slice
 // func (m *minData) Unpack(data []byte, opts ...func(opt *TypeRegistryOptions)) (output any, e error) {
-func (m *minData) Unpack(data []byte) (output any, e error) {
+func (m *minDataV1) Unpack(data []byte) (output any, e error) {
 
 	defer func() {
 		if r := recover(); r != nil {
