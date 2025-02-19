@@ -52,7 +52,6 @@ const (
 	ByteSliceType
 	ByteSliceSliceType
 	NilType
-	GobType
 )
 
 // Approach implements the mechanism to be used for serialisation
