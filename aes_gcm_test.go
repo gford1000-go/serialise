@@ -7,10 +7,10 @@ import (
 
 func TestWithAESGCMEncryption(t *testing.T) {
 
-	createOpt := func(key []byte) *SerialisationOptions {
+	createOpt := func(key []byte) *Options {
 		applyEncryption := WithAESGCMEncryption(key)
 
-		opt := SerialisationOptions{}
+		opt := Options{}
 		applyEncryption(&opt)
 
 		return &opt
@@ -49,10 +49,10 @@ func TestWithAESGCMEncryption(t *testing.T) {
 
 func TestWithAESGCMEncryption_1(t *testing.T) {
 
-	createOpt := func(key []byte) *SerialisationOptions {
+	createOpt := func(key []byte) *Options {
 		applyEncryption := WithAESGCMEncryption(key)
 
-		opt := SerialisationOptions{}
+		opt := Options{}
 		applyEncryption(&opt)
 
 		return &opt
@@ -83,10 +83,10 @@ func TestWithAESGCMEncryption_1(t *testing.T) {
 
 func TestWithAESGCMEncryption_2(t *testing.T) {
 
-	createOpt := func(key []byte) *SerialisationOptions {
+	createOpt := func(key []byte) *Options {
 		applyEncryption := WithAESGCMEncryption(key)
 
-		opt := SerialisationOptions{}
+		opt := Options{}
 		applyEncryption(&opt)
 
 		return &opt

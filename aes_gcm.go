@@ -13,9 +13,9 @@ var ErrInvalidDecryptionData = errors.New("data provided for decryption is too s
 
 // WithAESGCMEncryption establishes the option to encrypt/decrypt
 // data using aes-gcm with the specified key
-func WithAESGCMEncryption(key []byte) func(opt *SerialisationOptions) {
+func WithAESGCMEncryption(key []byte) func(opt *Options) {
 
-	return func(opt *SerialisationOptions) {
+	return func(opt *Options) {
 
 		nonceSize := 12
 

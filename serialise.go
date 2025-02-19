@@ -68,8 +68,8 @@ type Approach interface {
 	IsSerialisable(v any) bool
 }
 
-// SerialisationOptions adjust how serialisation is performed
-type SerialisationOptions struct {
+// Options adjust how serialisation is performed
+type Options struct {
 	// Approach specifies which serialisation method is to be used
 	Approach Approach
 	// Encryptor will encrypt the provided data
@@ -79,8 +79,8 @@ type SerialisationOptions struct {
 }
 
 // WithSerialisationApproach sets the serialisation approach to be used when calling ToBytes()
-func WithSerialisationApproach(approach Approach) func(*SerialisationOptions) {
-	return func(so *SerialisationOptions) {
+func WithSerialisationApproach(approach Approach) func(*Options) {
+	return func(so *Options) {
 		so.Approach = approach
 	}
 }
@@ -94,9 +94,9 @@ var defaultSerialisationApproach = NewMinDataApproach()
 // ToBytes returns a byte slice of the provded data.
 // Currently only gob based serialisation is available, but other options may become available, hence
 // the serialisation approach used is returned to guide future deserialisation.
-func ToBytes(data any, opts ...func(*SerialisationOptions)) ([]byte, string, error) {
+func ToBytes(data any, opts ...func(*Options)) ([]byte, string, error) {
 
-	o := SerialisationOptions{}
+	o := Options{}
 	for _, opt := range opts {
 		opt(&o)
 	}
@@ -129,7 +129,7 @@ var ErrNoDataToDeserialise = errors.New("no data provided for deserialisation")
 var ErrInvalidSerialisationApproach = errors.New("invalid serialisation approach provided")
 
 // FromBytes returns deserialises the byte slice to an instance using the specified approach.
-func FromBytes(data []byte, approach Approach, opts ...func(*SerialisationOptions)) (any, error) {
+func FromBytes(data []byte, approach Approach, opts ...func(*Options)) (any, error) {
 
 	if len(data) == 0 {
 		return nil, ErrNoDataToDeserialise
@@ -139,7 +139,7 @@ func FromBytes(data []byte, approach Approach, opts ...func(*SerialisationOption
 		return nil, ErrInvalidSerialisationApproach
 	}
 
-	o := SerialisationOptions{}
+	o := Options{}
 	for _, opt := range opts {
 		opt(&o)
 	}
