@@ -17,8 +17,7 @@ func init() {
 		m: map[string]Approach{},
 	}
 
-	// RegisterApproach(NewGOBApproach())
-	RegisterApproach(NewMinDataApproach())
+	RegisterApproach(NewMinDataApproachWithVersion(V1))
 }
 
 // RegisterApproach allows all registered Approach to be retrievable by Name()
