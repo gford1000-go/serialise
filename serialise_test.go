@@ -575,14 +575,6 @@ func TestToBytes(t *testing.T) {
 
 	approach := NewMinDataApproach()
 
-	// testRegistry := NewTypeRegistry()
-	// testRegistry.AddTypeOf(ss)
-	// testRegistry.AddTypeOf(is8)
-
-	// f := func(o *TypeRegistryOptions) {
-	// 	o.Registry = testRegistry
-	// }
-
 	for _, test := range tests {
 
 		b, _, err := ToBytes(test.V, WithSerialisationApproach(approach))
@@ -590,7 +582,6 @@ func TestToBytes(t *testing.T) {
 			t.Fatalf("Unexpected error: %v", err)
 		}
 
-		//v, err := FromBytes(b, approach, WithTypeRegistryOptions(f))
 		v, err := FromBytes(b, approach)
 		if err != nil {
 			t.Fatalf("Unexpected error: %v", err)
@@ -646,13 +637,6 @@ func TestToBytes_1(t *testing.T) {
 
 	approach := NewMinDataApproach()
 
-	// testRegistry := NewTypeRegistry()
-	// testRegistry.AddTypeOf(ss)
-
-	// f := func(o *TypeRegistryOptions) {
-	// 	o.Registry = testRegistry
-	// }
-
 	key := []byte("01234567890123456789012345678912")
 
 	for _, test := range tests {
@@ -662,7 +646,6 @@ func TestToBytes_1(t *testing.T) {
 			t.Fatalf("Unexpected error: %v", err)
 		}
 
-		//v, err := FromBytes(b, approach, WithTypeRegistryOptions(f), WithAESGCMEncryption(key))
 		v, err := FromBytes(b, approach, WithAESGCMEncryption(key))
 		if err != nil {
 			t.Fatalf("Unexpected error: %v", err)
