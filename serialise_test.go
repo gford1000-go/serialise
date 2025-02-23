@@ -88,7 +88,7 @@ func compareValue(a, b any, name string, t *testing.T) {
 		return
 	}
 
-	switch b.(type) {
+	switch v := b.(type) {
 	case []byte:
 		testCompareSliceValue[byte](a, b, name, t)
 	case int8:
@@ -169,6 +169,16 @@ func compareValue(a, b any, name string, t *testing.T) {
 		testComparePtrValue[string](a, b, name, t)
 	case []string:
 		testCompareSliceValue[string](a, b, name, t)
+	case [][]uint8:
+		bb := b.([][]uint8)
+		if len(bb) != len(v) {
+			t.Fatalf("Mismatch in lengths: %d vs %d for %s", len(bb), len(v), fmt.Sprintf("%T", b))
+		}
+		for i := 0; i < len(v); i++ {
+			if !bytes.Equal([]byte(bb[i]), []byte(v[i])) {
+				t.Fatalf("Mismatch in values: (%v) vs (%v) for item %d, %s", bb[i], v[i], i, fmt.Sprintf("%T", b))
+			}
+		}
 	default:
 		t.Fatalf("No test available for type: %s (%s)", fmt.Sprintf("%T", b), name)
 	}
@@ -689,6 +699,12 @@ func TestToBytesMany(t *testing.T) {
 		},
 		{
 			[]byte("Hello"), []byte("World"),
+		},
+		{
+			[][]byte{
+				[]byte("Hello"), []byte("World"),
+			},
+			[]byte("Hello World Again"),
 		},
 	}
 
