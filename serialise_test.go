@@ -724,6 +724,9 @@ func TestToBytesMany_1(t *testing.T) {
 		{
 			int64(2), []string{"Hello", "World"},
 		},
+		{
+			[]byte("Hello"), []byte("World"),
+		},
 	}
 
 	key := []byte("01234567890123456789012345678901")
