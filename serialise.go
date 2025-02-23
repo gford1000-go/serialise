@@ -90,9 +90,13 @@ var ErrUnexpectedSerialisationError = errors.New("unexpected error during serial
 // MinData is the current default serialisation approach
 var defaultSerialisationApproach = NewMinDataApproach()
 
+// Default returns the current serialisation approach that will be used
+// by Pack, Unpack etc., if not set explicitly using the WithSerialisationApproach() option.
+func Default() Approach {
+	return defaultSerialisationApproach
+}
+
 // ToBytes returns a byte slice of the provded data.
-// Currently only gob based serialisation is available, but other options may become available, hence
-// the serialisation approach used is returned to guide future deserialisation.
 func ToBytes(data any, opts ...func(*Options)) ([]byte, string, error) {
 
 	o := Options{}
@@ -153,6 +157,113 @@ func FromBytes(data []byte, approach Approach, opts ...func(*Options)) (any, err
 		}
 	}
 
-	//return approach.Unpack(b, func(opt *TypeRegistryOptions) { opt.replace(o.RegistryOptions) })
 	return approach.Unpack(b)
+}
+
+// ToBytesMany returns a byte slice of the provded data, individually packing all the items
+// into a single byte array.  Use FromBytesMany to deserialise.
+// An error will be generated if any of the items in the provided data are not serialisable
+// by the selected Approach.
+func ToBytesMany(data []any, opts ...func(*Options)) ([]byte, string, error) {
+
+	o := Options{}
+	for _, opt := range opts {
+		opt(&o)
+	}
+
+	// Defaults to the current defaultSerialisationApproach value if not specified via opts
+	if o.Approach == nil {
+		o.Approach = defaultSerialisationApproach
+	}
+
+	output := []byte{}
+
+	b, err := ToBytesI64(int64(len(data)))
+	if err != nil {
+		return nil, "", err
+	}
+
+	output = append(output, b...)
+
+	for _, item := range data {
+
+		b, err := o.Approach.Pack(item)
+		if err != nil {
+			return nil, "", err
+		}
+
+		bl, err := ToBytesI64(int64(len(b)))
+		if err != nil {
+			return nil, "", err
+		}
+
+		output = append(output, bl...)
+		output = append(output, b...)
+	}
+
+	// Apply optional encryption
+	if o.Encryptor != nil {
+		output, err = o.Encryptor(output)
+		if err != nil {
+			return nil, "", err
+		}
+	}
+
+	return output, o.Approach.Name(), nil
+}
+
+// FromBytesMany returns deserialises the byte slice to an array of instances using the specified Approach.
+func FromBytesMany(data []byte, approach Approach, opts ...func(*Options)) ([]any, error) {
+
+	if len(data) == 0 {
+		return nil, ErrNoDataToDeserialise
+	}
+
+	if approach == nil {
+		return nil, ErrInvalidSerialisationApproach
+	}
+
+	o := Options{}
+	for _, opt := range opts {
+		opt(&o)
+	}
+
+	// Apply optional encryption
+	var b []byte = data
+	var err error
+	if o.Decryptor != nil {
+		b, err = o.Decryptor(b)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	var sizeI64 = SizeOfI64()
+
+	size, err := FromBytesI64(b[0:sizeI64])
+	if err != nil {
+		return nil, err
+	}
+	b = b[sizeI64:]
+
+	output := make([]any, size)
+
+	var offset int64
+	for offset = 0; offset < size; offset++ {
+		itemSize, err := FromBytesI64(b[0:sizeI64])
+		if err != nil {
+			return nil, err
+		}
+
+		itemData := b[sizeI64 : sizeI64+itemSize]
+		v, err := approach.Unpack(itemData)
+		if err != nil {
+			return nil, err
+		}
+
+		output[offset] = v
+		b = b[sizeI64+itemSize:]
+	}
+
+	return output, nil
 }

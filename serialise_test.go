@@ -1,6 +1,7 @@
 package serialise
 
 import (
+	"bytes"
 	"fmt"
 	"testing"
 	"time"
@@ -77,6 +78,101 @@ func testComparePtrValue[T comparable](a, b any, name string, t *testing.T) {
 	default:
 		t.Fatalf("Unexpected error: b was the wrong type: %s", fmt.Sprintf("%T", b))
 	}
+}
+
+func compareValue(a, b any, name string, t *testing.T) {
+	if b == nil {
+		if a != nil {
+			t.Fatalf("Mismatch in <nil>")
+		}
+		return
+	}
+
+	switch b.(type) {
+	case []byte:
+		testCompareSliceValue[byte](a, b, name, t)
+	case int8:
+		testCompareValue[int8](a, b, name, t)
+	case *int8:
+		testComparePtrValue[int8](a, b, name, t)
+	case []int8:
+		testCompareSliceValue[int8](a, b, name, t)
+	case int16:
+		testCompareValue[int16](a, b, name, t)
+	case *int16:
+		testComparePtrValue[int16](a, b, name, t)
+	case []int16:
+		testCompareSliceValue[int16](a, b, name, t)
+	case int32:
+		testCompareValue[int32](a, b, name, t)
+	case *int32:
+		testComparePtrValue[int32](a, b, name, t)
+	case []int32:
+		testCompareSliceValue[int32](a, b, name, t)
+	case int64:
+		testCompareValue[int64](a, b, name, t)
+	case *int64:
+		testComparePtrValue[int64](a, b, name, t)
+	case []int64:
+		testCompareSliceValue[int64](a, b, name, t)
+	case uint8:
+		testCompareValue[uint8](a, b, name, t)
+	case *uint8:
+		testComparePtrValue[uint8](a, b, name, t)
+	case uint16:
+		testCompareValue[uint16](a, b, name, t)
+	case *uint16:
+		testComparePtrValue[uint16](a, b, name, t)
+	case []uint16:
+		testCompareSliceValue[uint16](a, b, name, t)
+	case uint32:
+		testCompareValue[uint32](a, b, name, t)
+	case *uint32:
+		testComparePtrValue[uint32](a, b, name, t)
+	case []uint32:
+		testCompareSliceValue[uint32](a, b, name, t)
+	case uint64:
+		testCompareValue[uint64](a, b, name, t)
+	case *uint64:
+		testComparePtrValue[uint64](a, b, name, t)
+	case []uint64:
+		testCompareSliceValue[uint64](a, b, name, t)
+	case float32:
+		testCompareValue[float32](a, b, name, t)
+	case *float32:
+		testComparePtrValue[float32](a, b, name, t)
+	case []float32:
+		testCompareSliceValue[float32](a, b, name, t)
+	case float64:
+		testCompareValue[float64](a, b, name, t)
+	case *float64:
+		testComparePtrValue[float64](a, b, name, t)
+	case []float64:
+		testCompareSliceValue[float64](a, b, name, t)
+	case bool:
+		testCompareValue[bool](a, b, name, t)
+	case *bool:
+		testComparePtrValue[bool](a, b, name, t)
+	case []bool:
+		testCompareSliceValue[bool](a, b, name, t)
+	case time.Duration:
+		testCompareValue[time.Duration](a, b, name, t)
+	case *time.Duration:
+		testComparePtrValue[time.Duration](a, b, name, t)
+	case []time.Duration:
+		testCompareSliceValue[time.Duration](a, b, name, t)
+	case time.Time:
+		testCompareValue[time.Time](a, b, name, t, timeNeq)
+	case string:
+		testCompareValue[string](a, b, name, t)
+	case *string:
+		testComparePtrValue[string](a, b, name, t)
+	case []string:
+		testCompareSliceValue[string](a, b, name, t)
+	default:
+		t.Fatalf("No test available for type: %s (%s)", fmt.Sprintf("%T", b), name)
+	}
+
 }
 
 func TestToMinBytes(t *testing.T) {
@@ -207,56 +303,7 @@ func TestToMinBytes(t *testing.T) {
 			t.Fatalf("Unexpected error for %s: %v", test.T, err)
 		}
 
-		switch v.(type) {
-		case int8:
-			testCompareValue[int8](v, i8, test.T, t)
-		case *int8:
-			testComparePtrValue[int8](v, &i8, test.T, t)
-		case int16:
-			testCompareValue[int16](v, i16, test.T, t)
-		case *int16:
-			testComparePtrValue[int16](v, &i16, test.T, t)
-		case int32:
-			testCompareValue[int32](v, i32, test.T, t)
-		case *int32:
-			testComparePtrValue[int32](v, &i32, test.T, t)
-		case int64:
-			testCompareValue[int64](v, i64, test.T, t)
-		case *int64:
-			testComparePtrValue[int64](v, &i64, test.T, t)
-		case uint8:
-			testCompareValue[uint8](v, u8, test.T, t)
-		case *uint8:
-			testComparePtrValue[uint8](v, &u8, test.T, t)
-		case uint16:
-			testCompareValue[uint16](v, u16, test.T, t)
-		case *uint16:
-			testComparePtrValue[uint16](v, &u16, test.T, t)
-		case uint32:
-			testCompareValue[uint32](v, u32, test.T, t)
-		case *uint32:
-			testComparePtrValue[uint32](v, &u32, test.T, t)
-		case uint64:
-			testCompareValue[uint64](v, u64, test.T, t)
-		case *uint64:
-			testComparePtrValue[uint64](v, &u64, test.T, t)
-		case float32:
-			testCompareValue[float32](v, f32, test.T, t)
-		case *float32:
-			testComparePtrValue[float32](v, &f32, test.T, t)
-		case float64:
-			testCompareValue[float64](v, f64, test.T, t)
-		case *float64:
-			testComparePtrValue[float64](v, &f64, test.T, t)
-		case string:
-			testCompareValue[string](v, s, test.T, t)
-		case *string:
-			testComparePtrValue[string](v, &s, test.T, t)
-		case []byte:
-			testCompareSliceValue[byte](v, bs, test.T, t)
-		default:
-			t.Fatalf("Unexpected type for %s: %T", test.T, v)
-		}
+		compareValue(v, test.V, test.T, t)
 	}
 
 	b, err := approach.Pack(nil)
@@ -349,97 +396,6 @@ func TestToBytes(t *testing.T) {
 	var bbs []bool = []bool{false, true, true, false}
 	var tds []time.Duration = []time.Duration{1, 2, 3, 4}
 	var tm time.Time = time.Now()
-
-	compareValue := func(a, b any, name string) {
-		if b == nil {
-			if a != nil {
-				t.Fatalf("Mismatch in <nil>")
-			}
-			return
-		}
-
-		switch b.(type) {
-		case []byte:
-			testCompareSliceValue[byte](a, b, name, t)
-		case int8:
-			testCompareValue[int8](a, b, name, t)
-		case *int8:
-			testComparePtrValue[int8](a, b, name, t)
-		case []int8:
-			testCompareSliceValue[int8](a, b, name, t)
-		case int16:
-			testCompareValue[int16](a, b, name, t)
-		case *int16:
-			testComparePtrValue[int16](a, b, name, t)
-		case []int16:
-			testCompareSliceValue[int16](a, b, name, t)
-		case int32:
-			testCompareValue[int32](a, b, name, t)
-		case *int32:
-			testComparePtrValue[int32](a, b, name, t)
-		case []int32:
-			testCompareSliceValue[int32](a, b, name, t)
-		case int64:
-			testCompareValue[int64](a, b, name, t)
-		case *int64:
-			testComparePtrValue[int64](a, b, name, t)
-		case []int64:
-			testCompareSliceValue[int64](a, b, name, t)
-		case uint8:
-			testCompareValue[uint8](a, b, name, t)
-		case *uint8:
-			testComparePtrValue[uint8](a, b, name, t)
-		case uint16:
-			testCompareValue[uint16](a, b, name, t)
-		case *uint16:
-			testComparePtrValue[uint16](a, b, name, t)
-		case []uint16:
-			testCompareSliceValue[uint16](a, b, name, t)
-		case uint32:
-			testCompareValue[uint32](a, b, name, t)
-		case *uint32:
-			testComparePtrValue[uint32](a, b, name, t)
-		case []uint32:
-			testCompareSliceValue[uint32](a, b, name, t)
-		case uint64:
-			testCompareValue[uint64](a, b, name, t)
-		case *uint64:
-			testComparePtrValue[uint64](a, b, name, t)
-		case []uint64:
-			testCompareSliceValue[uint64](a, b, name, t)
-		case float32:
-			testCompareValue[float32](a, b, name, t)
-		case *float32:
-			testComparePtrValue[float32](a, b, name, t)
-		case []float32:
-			testCompareSliceValue[float32](a, b, name, t)
-		case float64:
-			testCompareValue[float64](a, b, name, t)
-		case *float64:
-			testComparePtrValue[float64](a, b, name, t)
-		case []float64:
-			testCompareSliceValue[float64](a, b, name, t)
-		case bool:
-			testCompareValue[bool](a, b, name, t)
-		case *bool:
-			testComparePtrValue[bool](a, b, name, t)
-		case []bool:
-			testCompareSliceValue[bool](a, b, name, t)
-		case time.Duration:
-			testCompareValue[time.Duration](a, b, name, t)
-		case *time.Duration:
-			testComparePtrValue[time.Duration](a, b, name, t)
-		case []time.Duration:
-			testCompareSliceValue[time.Duration](a, b, name, t)
-		case time.Time:
-			testCompareValue[time.Time](a, b, name, t, timeNeq)
-		case []string:
-			testCompareSliceValue[string](a, b, name, t)
-		default:
-			t.Fatalf("No test available for type: %s (%s)", fmt.Sprintf("%T", b), name)
-		}
-
-	}
 
 	tests := []testData{
 		{
@@ -613,7 +569,7 @@ func TestToBytes(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Unexpected error: %v", err)
 		}
-		compareValue(v, test.V, test.TypeName)
+		compareValue(v, test.V, test.TypeName, t)
 	}
 }
 
@@ -627,25 +583,6 @@ func TestToBytes_1(t *testing.T) {
 	var i8 int8 = 42
 	var ss []string = []string{"This", "is", "not", "encrypted"}
 	var ss2 []string = []string{"01234567890123456789012345678901234567890123456789"}
-
-	compareValue := func(a, b any, name string) {
-		if b == nil {
-			if a != nil {
-				t.Fatalf("Mismatch in <nil>")
-			}
-			return
-		}
-
-		switch b.(type) {
-		case int8:
-			testCompareValue[int8](a, b, name, t)
-		case []string:
-			testCompareSliceValue[string](a, b, name, t)
-		default:
-			t.Fatalf("No test available for type: %s (%s)", fmt.Sprintf("%T", b), name)
-		}
-
-	}
 
 	tests := []testData{
 		{
@@ -677,7 +614,7 @@ func TestToBytes_1(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Unexpected error: %v", err)
 		}
-		compareValue(v, test.V, test.TypeName)
+		compareValue(v, test.V, test.TypeName, t)
 	}
 }
 
@@ -689,23 +626,6 @@ func TestToBytes_2(t *testing.T) {
 	}
 
 	var i8 int8 = 42
-
-	compareValue := func(a, b any, name string) {
-		if b == nil {
-			if a != nil {
-				t.Fatalf("Mismatch in <nil>")
-			}
-			return
-		}
-
-		switch b.(type) {
-		case int8:
-			testCompareValue[int8](a, b, name, t)
-		default:
-			t.Fatalf("No test available for type: %s (%s)", fmt.Sprintf("%T", b), name)
-		}
-
-	}
 
 	tests := []testData{
 		{
@@ -729,6 +649,107 @@ func TestToBytes_2(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Unexpected error: %v", err)
 		}
-		compareValue(v, test.V, test.TypeName)
+		compareValue(v, test.V, test.TypeName, t)
+	}
+}
+
+func TestToBytes_3(t *testing.T) {
+
+	var i8 int8 = 42
+
+	b1, name1, _ := ToBytes(i8)
+	b2, name2, _ := ToBytes(i8, WithSerialisationApproach(defaultSerialisationApproach))
+
+	if defaultSerialisationApproach.Name() != name2 {
+		t.Fatalf("Unexpected name returned: expected: %s, got: %s", defaultSerialisationApproach.Name(), name2)
+	}
+
+	if name1 != name2 {
+		t.Fatalf("Unexpected difference in names: got: %s rather than: %s", name1, name2)
+	}
+
+	if !bytes.Equal(b1, b2) {
+		t.Fatalf("Unexpected variation in byte slices")
+	}
+}
+
+func TestToBytesMany(t *testing.T) {
+
+	tests := [][]any{
+		{
+			int64(0), float32(-42),
+		},
+		{
+			int64(2), []string{"Hello", "World"},
+		},
+		{},
+		{nil},
+		{
+			int64(-1), "", "Hello", nil, true,
+		},
+	}
+
+	for i, test := range tests {
+
+		b, name, err := ToBytesMany(test, WithSerialisationApproach(defaultSerialisationApproach))
+		if err != nil {
+			t.Fatalf("(%d) Unexpected error when serialising: %v", i, err)
+		}
+		if name != defaultSerialisationApproach.Name() {
+			t.Fatalf("(%d) Unexpected difference in Approach name: expected: %s, got: %s", i, defaultSerialisationApproach.Name(), name)
+		}
+
+		v, err := FromBytesMany(b, defaultSerialisationApproach)
+		if err != nil {
+			t.Fatalf("(%d) Unexpected error when deserialising: %v", i, err)
+		}
+
+		if len(v) != len(test) {
+			t.Fatalf("(%d) Unexpected error in output length: expected: %d, got: %d", i, len(test), len(v))
+		}
+
+		for j := 0; j < len(test); j++ {
+			compareValue(v[j], test[j], fmt.Sprintf("%T", test[j]), t)
+
+		}
+	}
+}
+
+func TestToBytesMany_1(t *testing.T) {
+
+	tests := [][]any{
+		{
+			int64(0), float32(-42),
+		},
+		{
+			int64(2), []string{"Hello", "World"},
+		},
+	}
+
+	key := []byte("01234567890123456789012345678901")
+
+	for i, test := range tests {
+
+		b, name, err := ToBytesMany(test, WithSerialisationApproach(defaultSerialisationApproach), WithAESGCMEncryption(key))
+		if err != nil {
+			t.Fatalf("(%d) Unexpected error when serialising: %v", i, err)
+		}
+		if name != defaultSerialisationApproach.Name() {
+			t.Fatalf("(%d) Unexpected difference in Approach name: expected: %s, got: %s", i, defaultSerialisationApproach.Name(), name)
+		}
+
+		v, err := FromBytesMany(b, defaultSerialisationApproach, WithAESGCMEncryption(key))
+		if err != nil {
+			t.Fatalf("(%d) Unexpected error when deserialising: %v", i, err)
+		}
+
+		if len(v) != len(test) {
+			t.Fatalf("(%d) Unexpected error in output length: expected: %d, got: %d", i, len(test), len(v))
+		}
+
+		for j := 0; j < len(test); j++ {
+			compareValue(v[j], test[j], fmt.Sprintf("%T", test[j]), t)
+
+		}
 	}
 }
