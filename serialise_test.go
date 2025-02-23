@@ -687,6 +687,9 @@ func TestToBytesMany(t *testing.T) {
 		{
 			int64(-1), "", "Hello", nil, true,
 		},
+		{
+			[]byte("Hello"), []byte("World"),
+		},
 	}
 
 	for i, test := range tests {
