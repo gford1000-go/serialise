@@ -1,7 +1,10 @@
 package serialise
 
 import (
+	"bytes"
+	"compress/flate"
 	"errors"
+	"io"
 )
 
 // TypeID identifies the types that are supported by serialisation
@@ -114,6 +117,11 @@ func ToBytes(data any, opts ...func(*Options)) ([]byte, string, error) {
 		return nil, "", err
 	}
 
+	b, err = deflate(b)
+	if err != nil {
+		return nil, "", err
+	}
+
 	// Apply optional encryption
 	if o.Encryptor != nil {
 		b, err = o.Encryptor(b)
@@ -155,6 +163,11 @@ func FromBytes(data []byte, approach Approach, opts ...func(*Options)) (any, err
 		if err != nil {
 			return nil, err
 		}
+	}
+
+	b, err = reflate(b)
+	if err != nil {
+		return nil, err
 	}
 
 	return approach.Unpack(b)
@@ -201,6 +214,11 @@ func ToBytesMany(data []any, opts ...func(*Options)) ([]byte, string, error) {
 		output = append(output, b...)
 	}
 
+	output, err = deflate(output)
+	if err != nil {
+		return nil, "", err
+	}
+
 	// Apply optional encryption
 	if o.Encryptor != nil {
 		output, err = o.Encryptor(output)
@@ -210,6 +228,36 @@ func ToBytesMany(data []any, opts ...func(*Options)) ([]byte, string, error) {
 	}
 
 	return output, o.Approach.Name(), nil
+}
+
+func deflate(b []byte) ([]byte, error) {
+	var flag byte = 0
+	if len(b) > 10 {
+		oLen := len(b)
+		var buf bytes.Buffer
+		writer, _ := flate.NewWriter(&buf, flate.BestCompression)
+		_, err := writer.Write(b)
+		if err != nil {
+			return nil, err
+		}
+		writer.Close()
+		bf := buf.Bytes()
+
+		if oLen > len(bf) {
+			flag = 1
+			b = bf
+		}
+	}
+	return append([]byte{flag}, b...), nil
+}
+
+func reflate(b []byte) ([]byte, error) {
+	if b[0] == 1 {
+		r := flate.NewReader(bytes.NewReader(b[1:]))
+		return io.ReadAll(r)
+	} else {
+		return b[1:], nil
+	}
 }
 
 // FromBytesMany returns deserialises the byte slice to an array of instances using the specified Approach.
@@ -236,6 +284,11 @@ func FromBytesMany(data []byte, approach Approach, opts ...func(*Options)) ([]an
 		if err != nil {
 			return nil, err
 		}
+	}
+
+	b, err = reflate(b)
+	if err != nil {
+		return nil, err
 	}
 
 	var sizeI64 = SizeOfI64()
