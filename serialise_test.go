@@ -775,3 +775,135 @@ func TestToBytesMany_1(t *testing.T) {
 		}
 	}
 }
+
+func benchToBytes(v any, b *testing.B) {
+	bv, name, err := ToBytes(v)
+	if err != nil {
+		b.Fatalf("Unexpected error: %v", err)
+	}
+
+	for i := 0; i < b.N; i++ {
+		bbb, nn, err := ToBytes(v)
+		if err != nil {
+			b.Fatalf("(%d) Unexpected error: %v", i, err)
+		}
+		if !bytes.Equal(bv, bbb) {
+			b.Fatalf("(%d) Unexpected mismatch", i)
+		}
+		if name != nn {
+			b.Fatalf("(%d) Unexpected Approach name mismatch: %v vs %v", i, name, nn)
+		}
+	}
+}
+
+func benchToBytesMany(v []any, b *testing.B) {
+	bv, name, err := ToBytesMany(v)
+	if err != nil {
+		b.Fatalf("Unexpected error: %v", err)
+	}
+
+	for i := 0; i < b.N; i++ {
+		bbb, nn, err := ToBytesMany(v)
+		if err != nil {
+			b.Fatalf("(%d) Unexpected error: %v", i, err)
+		}
+		if !bytes.Equal(bv, bbb) {
+			b.Fatalf("(%d) Unexpected mismatch", i)
+		}
+		if name != nn {
+			b.Fatalf("(%d) Unexpected Approach name mismatch: %v vs %v", i, name, nn)
+		}
+	}
+}
+
+func benchFromBytes(v any, b *testing.B) {
+	bv, _, err := ToBytes(v)
+	if err != nil {
+		b.Fatalf("Unexpected error: %v", err)
+	}
+
+	for i := 0; i < b.N; i++ {
+		_, err := FromBytes(bv, defaultSerialisationApproach)
+		if err != nil {
+			b.Fatalf("(%d) Unexpected error: %v", i, err)
+		}
+	}
+}
+
+func benchFromBytesMany(v []any, b *testing.B) {
+	bv, _, err := ToBytesMany(v)
+	if err != nil {
+		b.Fatalf("Unexpected error: %v", err)
+	}
+
+	for i := 0; i < b.N; i++ {
+		_, err := FromBytesMany(bv, defaultSerialisationApproach)
+		if err != nil {
+			b.Fatalf("(%d) Unexpected error: %v", i, err)
+		}
+	}
+}
+
+func BenchmarkToBytes(b *testing.B) {
+	benchToBytes(int16(42), b)
+}
+
+func BenchmarkToBytes_1(b *testing.B) {
+	benchToBytes(string("Hello World"), b)
+}
+
+func BenchmarkToBytes_2(b *testing.B) {
+	benchToBytes([]string{"Hello, World"}, b)
+}
+
+func BenchmarkToBytes_3(b *testing.B) {
+	benchToBytes(float64(1.2345), b)
+}
+
+func BenchmarkToBytes_4(b *testing.B) {
+	benchToBytes([]float64{-1.234, 1.234}, b)
+}
+
+func BenchmarkFromBytes(b *testing.B) {
+	benchFromBytes(int16(42), b)
+}
+
+func BenchmarkFromBytes_1(b *testing.B) {
+	benchFromBytes(string("Hello World"), b)
+}
+
+func BenchmarkFromBytes_2(b *testing.B) {
+	benchFromBytes([]string{"Hello", "World"}, b)
+}
+
+func BenchmarkFromBytes_3(b *testing.B) {
+	benchToBytes(float64(1.2345), b)
+}
+
+func BenchmarkFromBytes_4(b *testing.B) {
+	benchToBytes([]float64{-1.234, 1.234}, b)
+}
+
+func BenchmarkToBytesMany(b *testing.B) {
+	benchToBytesMany([]any{int16(42)}, b)
+}
+
+func BenchmarkToBytesMany_1(b *testing.B) {
+	benchToBytesMany([]any{int16(42), int16(42), int16(42), int16(42), int16(42), int16(42)}, b)
+}
+
+func BenchmarkToBytesMany_2(b *testing.B) {
+	benchToBytesMany([]any{string("Hello World")}, b)
+}
+
+func BenchmarkFromBytesMany(b *testing.B) {
+	benchFromBytesMany([]any{int16(42)}, b)
+}
+
+func BenchmarkFromBytesMany_1(b *testing.B) {
+	benchFromBytesMany([]any{int16(42), int16(42), int16(42), int16(42), int16(42), int16(42)}, b)
+}
+
+func BenchmarkFromBytesMany_2(b *testing.B) {
+	benchFromBytesMany([]any{string("Hello World")}, b)
+}

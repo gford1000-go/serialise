@@ -232,7 +232,7 @@ func ToBytesMany(data []any, opts ...func(*Options)) ([]byte, string, error) {
 
 func deflate(b []byte) ([]byte, error) {
 	var flag byte = 0
-	if len(b) > 10 {
+	if len(b) > 25 { // Trading of time cost of Flate against space... for small []byte cost is too high
 		oLen := len(b)
 		var buf bytes.Buffer
 		writer, _ := flate.NewWriter(&buf, flate.BestCompression)
