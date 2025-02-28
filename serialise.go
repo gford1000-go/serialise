@@ -189,7 +189,7 @@ func ToBytesMany(data []any, opts ...func(*Options)) ([]byte, string, error) {
 		o.Approach = defaultSerialisationApproach
 	}
 
-	output := []byte{}
+	output := make([]byte, 0, 128)
 
 	b, err := ToBytesI64(int64(len(data)))
 	if err != nil {
