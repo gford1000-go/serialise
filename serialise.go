@@ -78,6 +78,9 @@ type Options struct {
 	Encryptor func(data []byte) ([]byte, error)
 	// Decryptor will decrypt the provided data
 	Decryptor func(data []byte) ([]byte, error)
+	// FlateThreshold determines the point at which Flate compression will be applied
+	// Setting to -1 indicates no compression to be used, whatever size
+	FlateThreshold int
 }
 
 // WithSerialisationApproach sets the serialisation approach to be used when calling ToBytes()
@@ -87,11 +90,25 @@ func WithSerialisationApproach(approach Approach) func(*Options) {
 	}
 }
 
+// WithFlateThreshold sets the threshold for compression using Flate.
+// If value is less than 0, no compression will be used.
+// If value is 0 (or unset), then defaultFlateThreshold (25) is used.
+// For other values, Flate will be invoked when serialised data is beyond the threshold value.
+// This allows users to balance between runtime performance and size of serialised data.
+func WithFlateThreshold(thresholdInBytes int) func(*Options) {
+	return func(so *Options) {
+		so.FlateThreshold = thresholdInBytes
+	}
+}
+
 // ErrUnexpectedSerialisationError raised if an invalid serialisation approach is specified
 var ErrUnexpectedSerialisationError = errors.New("unexpected error during serialisation")
 
 // MinData is the current default serialisation approach
 var defaultSerialisationApproach = NewMinDataApproach()
+
+// FlateThreshold default of 25 bytes creates a good balance between cpu cost and space cost
+var defaultFlateThreshold int = 25
 
 // Default returns the current serialisation approach that will be used
 // by Pack, Unpack etc., if not set explicitly using the WithSerialisationApproach() option.
@@ -112,12 +129,20 @@ func ToBytes(data any, opts ...func(*Options)) ([]byte, string, error) {
 		o.Approach = defaultSerialisationApproach
 	}
 
+	// Defaults to the current defaultFlateThreshold value if not specified via opts
+	if o.FlateThreshold == 0 {
+		o.FlateThreshold = defaultFlateThreshold
+	}
+	if o.FlateThreshold < 0 {
+		o.FlateThreshold = -1 // Only valid value for negative input
+	}
+
 	b, err := o.Approach.Pack(data)
 	if err != nil {
 		return nil, "", err
 	}
 
-	b, err = deflate(b)
+	b, err = deflate(b, o.FlateThreshold)
 	if err != nil {
 		return nil, "", err
 	}
@@ -189,6 +214,14 @@ func ToBytesMany(data []any, opts ...func(*Options)) ([]byte, string, error) {
 		o.Approach = defaultSerialisationApproach
 	}
 
+	// Defaults to the current defaultFlateThreshold value if not specified via opts
+	if o.FlateThreshold == 0 {
+		o.FlateThreshold = defaultFlateThreshold
+	}
+	if o.FlateThreshold < 0 {
+		o.FlateThreshold = -1 // Only valid value for negative input
+	}
+
 	output := make([]byte, 0, 128)
 
 	b, err := ToBytesI64(int64(len(data)))
@@ -214,7 +247,7 @@ func ToBytesMany(data []any, opts ...func(*Options)) ([]byte, string, error) {
 		output = append(output, b...)
 	}
 
-	output, err = deflate(output)
+	output, err = deflate(output, o.FlateThreshold)
 	if err != nil {
 		return nil, "", err
 	}
@@ -230,9 +263,9 @@ func ToBytesMany(data []any, opts ...func(*Options)) ([]byte, string, error) {
 	return output, o.Approach.Name(), nil
 }
 
-func deflate(b []byte) ([]byte, error) {
+func deflate(b []byte, threshold int) ([]byte, error) {
 	var flag byte = 0
-	if len(b) > 25 { // Trading of time cost of Flate against space... for small []byte cost is too high
+	if threshold > -1 && len(b) > threshold { // Trading of time cost of Flate against space... for small []byte cost is too high
 		oLen := len(b)
 		var buf bytes.Buffer
 		writer, _ := flate.NewWriter(&buf, flate.BestCompression)
@@ -243,7 +276,7 @@ func deflate(b []byte) ([]byte, error) {
 		writer.Close()
 		bf := buf.Bytes()
 
-		if oLen > len(bf) {
+		if oLen > len(bf) { // Sometimes Flate creates a bigger output than its input
 			flag = 1
 			b = bf
 		}

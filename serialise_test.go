@@ -830,14 +830,14 @@ func benchFromBytes(v any, b *testing.B) {
 	}
 }
 
-func benchFromBytesMany(v []any, b *testing.B) {
-	bv, _, err := ToBytesMany(v)
+func benchFromBytesMany(v []any, b *testing.B, opts ...func(*Options)) {
+	bv, _, err := ToBytesMany(v, opts...)
 	if err != nil {
 		b.Fatalf("Unexpected error: %v", err)
 	}
 
 	for i := 0; i < b.N; i++ {
-		_, err := FromBytesMany(bv, defaultSerialisationApproach)
+		_, err := FromBytesMany(bv, defaultSerialisationApproach, opts...)
 		if err != nil {
 			b.Fatalf("(%d) Unexpected error: %v", i, err)
 		}
@@ -906,4 +906,24 @@ func BenchmarkFromBytesMany_1(b *testing.B) {
 
 func BenchmarkFromBytesMany_2(b *testing.B) {
 	benchFromBytesMany([]any{string("Hello World")}, b)
+}
+
+func BenchmarkFromBytesMany_3(b *testing.B) {
+	benchFromBytesMany([]any{int16(42), int16(42), int16(42), int16(42), int16(42), int16(42)}, b, WithFlateThreshold(20))
+}
+
+func BenchmarkFromBytesMany_4(b *testing.B) {
+	benchFromBytesMany([]any{int16(42), int16(42), int16(42), int16(42), int16(42), int16(42)}, b, WithFlateThreshold(30))
+}
+
+func BenchmarkFromBytesMany_5(b *testing.B) {
+	benchFromBytesMany([]any{int16(42), int16(42), int16(42), int16(42), int16(42), int16(42)}, b, WithFlateThreshold(40))
+}
+
+func BenchmarkFromBytesMany_6(b *testing.B) {
+	benchFromBytesMany([]any{int16(42), int16(42), int16(42), int16(42), int16(42), int16(42)}, b, WithFlateThreshold(60))
+}
+
+func BenchmarkFromBytesMany_7(b *testing.B) {
+	benchFromBytesMany([]any{int16(42), int16(42), int16(42), int16(42), int16(42), int16(42)}, b, WithFlateThreshold(-1))
 }
