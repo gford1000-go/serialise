@@ -164,8 +164,18 @@ var ErrNoDataToDeserialise = errors.New("no data provided for deserialisation")
 // ErrInvalidSerialisationApproach raised if the serialisation approach is not valid
 var ErrInvalidSerialisationApproach = errors.New("invalid serialisation approach provided")
 
+// ErrFromBytesInvalidData raised if FromBytes is provided with invalid byte slice
+var ErrFromBytesInvalidData = errors.New("invalid data provided. data must be created using ToBytes()")
+
 // FromBytes returns deserialises the byte slice to an instance using the specified approach.
-func FromBytes(data []byte, approach Approach, opts ...func(*Options)) (any, error) {
+func FromBytes(data []byte, approach Approach, opts ...func(*Options)) (v any, e error) {
+
+	defer func() {
+		if r := recover(); r != nil {
+			v = nil
+			e = ErrFromBytesInvalidData
+		}
+	}()
 
 	if len(data) == 0 {
 		return nil, ErrNoDataToDeserialise
@@ -293,8 +303,18 @@ func reflate(b []byte) ([]byte, error) {
 	}
 }
 
+// ErrFromBytesManyInvalidData raised if FromBytesMany is provided with invalid byte slice
+var ErrFromBytesManyInvalidData = errors.New("invalid data provided. data must be created using ToBytesMany()")
+
 // FromBytesMany returns deserialises the byte slice to an array of instances using the specified Approach.
-func FromBytesMany(data []byte, approach Approach, opts ...func(*Options)) ([]any, error) {
+func FromBytesMany(data []byte, approach Approach, opts ...func(*Options)) (v []any, e error) {
+
+	defer func() {
+		if r := recover(); r != nil {
+			v = nil
+			e = ErrFromBytesManyInvalidData
+		}
+	}()
 
 	if len(data) == 0 {
 		return nil, ErrNoDataToDeserialise
