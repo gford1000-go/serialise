@@ -354,14 +354,13 @@ func FromBytesMany(data []byte, approach Approach, opts ...func(*Options)) (v []
 
 	output := make([]any, size)
 
-	var offset int64
-	for offset = 0; offset < size; offset++ {
+	for offset := range size {
 		itemSize, err := FromBytesI64(b[0:sizeI64])
 		if err != nil {
 			return nil, err
 		}
-
 		itemData := b[sizeI64 : sizeI64+itemSize]
+
 		v, err := approach.Unpack(itemData)
 		if err != nil {
 			return nil, err
